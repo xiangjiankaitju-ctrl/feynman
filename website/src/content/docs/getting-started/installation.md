@@ -7,19 +7,33 @@ order: 1
 
 ## Requirements
 
-- Node.js 20 or later
-- npm 9 or later
+- macOS, Linux, or WSL
+- `curl` or `wget`
 
-## Install
+## Recommended install
 
 ```bash
-npm install -g @companion-ai/feynman
+curl -fsSL https://raw.githubusercontent.com/getcompanion-ai/feynman/main/scripts/install/install.sh | bash
 ```
 
 ## Verify
 
 ```bash
 feynman --version
+```
+
+## Windows PowerShell
+
+```powershell
+irm https://raw.githubusercontent.com/getcompanion-ai/feynman/main/scripts/install/install.ps1 | iex
+```
+
+## npm fallback
+
+If you already manage Node yourself:
+
+```bash
+npm install -g @companion-ai/feynman
 ```
 
 ## Local Development
