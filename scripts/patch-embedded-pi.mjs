@@ -367,6 +367,9 @@ if (oauthPagePath && existsSync(oauthPagePath)) {
 	if (source.includes(piLogo)) {
 		const feynmanLogo = `const LOGO_SVG = \`${FEYNMAN_LOGO_HTML}\`;`;
 		source = source.replace(piLogo, feynmanLogo);
+		source = source.replaceAll("Authentication successful", "Logged in");
+		source = source.replaceAll("Authentication failed", "Login failed");
+		source = source.replace("You can close this window.", "You can close this tab.");
 		writeFileSync(oauthPagePath, source, "utf8");
 	}
 }
