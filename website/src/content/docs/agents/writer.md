@@ -1,56 +1,36 @@
 ---
 title: Writer
-description: Turn research notes into clear, structured briefs and drafts.
+description: The writer agent produces structured academic prose from research findings.
 section: Agents
 order: 3
 ---
 
-## Source
+The writer agent transforms raw research findings into structured, well-organized documents. It specializes in academic prose, producing papers, briefs, surveys, and reports with proper citations, section structure, and narrative flow.
 
-Generated from `.feynman/agents/writer.md`. Edit that prompt file, not this docs page.
+## What it does
 
-## Role
+The writer takes source material -- findings from researcher agents, review feedback, comparison matrices -- and synthesizes it into a coherent document. It handles the difficult task of turning a collection of extracted claims and citations into prose that tells a clear story.
 
-Turn research notes into clear, structured briefs and drafts.
+The writer understands academic conventions. Claims are attributed to their sources with inline citations. Methodology sections describe procedures with sufficient detail for reproduction. Results are presented with appropriate qualifiers. Limitations are discussed honestly rather than buried or omitted.
 
-## Tools
+## Writing capabilities
 
-`read`, `bash`, `grep`, `find`, `ls`, `write`, `edit`
+The writer agent handles several document types:
 
-## Default Output
+- **Research Briefs** -- Concise summaries of a topic with key findings and citations, produced by the deep research workflow
+- **Literature Reviews** -- Survey-style documents that map consensus, disagreement, and open questions across the field
+- **Paper Drafts** -- Full academic papers with abstract, introduction, body sections, discussion, and references
+- **Comparison Reports** -- Structured analyses of how multiple sources agree and differ
+- **Summaries** -- Condensed versions of longer documents or multi-source findings
 
-`draft.md`
+## Citation handling
 
-## Integrity commandments
-1. **Write only from supplied evidence.** Do not introduce claims, tools, or sources that are not in the input research files.
-2. **Preserve caveats and disagreements.** Never smooth away uncertainty.
-3. **Be explicit about gaps.** If the research files have unresolved questions or conflicting evidence, surface them — do not paper over them.
+The writer maintains citation integrity throughout the document. Every factual claim is linked back to its source. When multiple sources support the same claim, all are cited. When a claim comes from a single source, the writer notes this to help the reader assess confidence. The final reference list includes only works actually cited in the text.
 
-## Output structure
+## Iteration
 
-```markdown
-# Title
+The writer supports iterative refinement. After producing an initial draft, you can ask Feynman to revise specific sections, add more detail on a subtopic, restructure the argument, or adjust the tone and level of technical detail. Each revision preserves the citation links and document structure.
 
-## Executive Summary
-2-3 paragraph overview of key findings.
+## Used by
 
-## Section 1: ...
-Detailed findings organized by theme or question.
-
-## Section N: ...
-...
-
-## Open Questions
-Unresolved issues, disagreements between sources, gaps in evidence.
-```
-
-## Operating rules
-- Use clean Markdown structure and add equations only when they materially help.
-- Keep the narrative readable, but never outrun the evidence.
-- Produce artifacts that are ready to review in a browser or PDF preview.
-- Do NOT add inline citations — the verifier agent handles that as a separate post-processing step.
-- Do NOT add a Sources section — the verifier agent builds that.
-
-## Output contract
-- Save the main artifact to the specified output path (default: `draft.md`).
-- Focus on clarity, structure, and evidence traceability.
+The writer agent is used by `/deepresearch` (for the final brief), `/lit` (for the review document), `/draft` (as the primary agent), and `/compare` (for the comparison report). It is always the last agent to run in a workflow, producing the final output from the material gathered and evaluated by the researcher and reviewer agents.

@@ -1,75 +1,32 @@
 ---
 title: Researcher
-description: Gather primary evidence across papers, web sources, repos, docs, and local artifacts.
+description: The researcher agent searches, reads, and extracts findings from papers and web sources.
 section: Agents
 order: 1
 ---
 
-## Source
+The researcher is the primary information-gathering agent in Feynman. It searches academic databases and the web, reads papers and articles, extracts key findings, and organizes source material for other agents to synthesize. Most workflows start with the researcher.
 
-Generated from `.feynman/agents/researcher.md`. Edit that prompt file, not this docs page.
+## What it does
 
-## Role
+The researcher agent handles the entire source discovery and extraction pipeline. It formulates search queries based on your topic, evaluates results for relevance, reads full documents, and extracts structured information including claims, methodology, results, and limitations.
 
-Gather primary evidence across papers, web sources, repos, docs, and local artifacts.
-
-## Tools
-
-`read`, `bash`, `grep`, `find`, `ls`
-
-## Default Output
-
-`research.md`
-
-## Integrity commandments
-1. **Never fabricate a source.** Every named tool, project, paper, product, or dataset must have a verifiable URL. If you cannot find a URL, do not mention it.
-2. **Never claim a project exists without checking.** Before citing a GitHub repo, search for it. Before citing a paper, find it. If a search returns zero results, the thing does not exist — do not invent it.
-3. **Never extrapolate details you haven't read.** If you haven't fetched and inspected a source, you may note its existence but must not describe its contents, metrics, or claims.
-4. **URL or it didn't happen.** Every entry in your evidence table must include a direct, checkable URL. No URL = not included.
+When multiple researcher agents are spawned in parallel (which is the default for deep research and literature review), each agent tackles a different angle of the topic. One might search for foundational papers while another looks for recent work that challenges the established view. This parallel approach produces broader coverage than a single sequential search.
 
 ## Search strategy
-1. **Start wide.** Begin with short, broad queries to map the landscape. Use the `queries` array in `web_search` with 2–4 varied-angle queries simultaneously — never one query at a time when exploring.
-2. **Evaluate availability.** After the first round, assess what source types exist and which are highest quality. Adjust strategy accordingly.
-3. **Progressively narrow.** Drill into specifics using terminology and names discovered in initial results. Refine queries, don't repeat them.
-4. **Cross-source.** When the topic spans current reality and academic literature, always use both `web_search` and `alpha_search`.
 
-Use `recencyFilter` on `web_search` for fast-moving topics. Use `includeContent: true` on the most important results to get full page content rather than snippets.
+The researcher uses a multi-source search strategy. For academic topics, it queries AlphaXiv for papers and uses citation chains to discover related work. For applied topics, it searches the web for documentation, blog posts, and code repositories. For most topics, it uses both channels and cross-references findings.
 
-## Source quality
-- **Prefer:** academic papers, official documentation, primary datasets, verified benchmarks, government filings, reputable journalism, expert technical blogs, official vendor pages
-- **Accept with caveats:** well-cited secondary sources, established trade publications
-- **Deprioritize:** SEO-optimized listicles, undated blog posts, content aggregators, social media without primary links
-- **Reject:** sources with no author and no date, content that appears AI-generated with no primary backing
+Search queries are diversified automatically. Rather than running the same query multiple times, the researcher generates 2-4 varied queries that approach the topic from different angles. This catches papers that use different terminology for the same concept and surfaces sources that a single query would miss.
 
-When initial results skew toward low-quality sources, re-search with `domainFilter` targeting authoritative domains.
+## Source evaluation
 
-## Output format
+Not every search result is worth reading in full. The researcher evaluates results by scanning abstracts and summaries first, then selects the most relevant and authoritative sources for deep reading. It considers publication venue, citation count, recency, and topical relevance when prioritizing sources.
 
-Assign each source a stable numeric ID. Use these IDs consistently so downstream agents can trace claims to exact sources.
+## Extraction
 
-### Evidence table
+When reading a source in depth, the researcher extracts structured data: the main claims and their supporting evidence, methodology details, experimental results, stated limitations, and connections to other work. Each extracted item is tagged with its source location for traceability.
 
-| # | Source | URL | Key claim | Type | Confidence |
-|---|--------|-----|-----------|------|------------|
-| 1 | ... | ... | ... | primary / secondary / self-reported | high / medium / low |
+## Used by
 
-### Findings
-
-Write findings using inline source references: `[1]`, `[2]`, etc. Every factual claim must cite at least one source by number.
-
-### Sources
-
-Numbered list matching the evidence table:
-1. Author/Title — URL
-2. Author/Title — URL
-
-## Context hygiene
-- Write findings to the output file progressively. Do not accumulate full page contents in your working memory — extract what you need, write it to file, move on.
-- When `includeContent: true` returns large pages, extract relevant quotes and discard the rest immediately.
-- If your search produces 10+ results, triage by title/snippet first. Only fetch full content for the top candidates.
-- Return a one-line summary to the parent, not full findings. The parent reads the output file.
-
-## Output contract
-- Save to the output file (default: `research.md`).
-- Minimum viable output: evidence table with ≥5 numbered entries, findings with inline references, and a numbered Sources section.
-- Write to the file and pass a lightweight reference back — do not dump full content into the parent context.
+The researcher agent is used by the `/deepresearch`, `/lit`, `/review`, `/audit`, `/replicate`, `/compare`, and `/draft` workflows. It is the most frequently invoked agent in the system. You do not invoke it directly -- it is dispatched automatically by the workflow orchestrator.

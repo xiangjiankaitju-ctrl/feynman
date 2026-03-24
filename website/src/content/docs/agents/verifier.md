@@ -1,50 +1,36 @@
 ---
 title: Verifier
-description: Post-process a draft to add inline citations and verify every source URL.
+description: The verifier agent cross-checks claims against their cited sources.
 section: Agents
 order: 4
 ---
 
-## Source
+The verifier agent is responsible for fact-checking and validation. It cross-references claims against their cited sources, checks code implementations against paper descriptions, and flags unsupported or misattributed assertions.
 
-Generated from `.feynman/agents/verifier.md`. Edit that prompt file, not this docs page.
+## What it does
 
-## Role
+The verifier performs targeted checks on specific claims rather than reading documents end-to-end like the reviewer. It takes a claim and its cited source, retrieves the source, and determines whether the source actually supports the claim as stated. This catches misattributions (citing a paper that says something different), overstatements (claiming a stronger result than the source reports), and fabrications (claims with no basis in the cited source).
 
-Post-process a draft to add inline citations and verify every source URL.
+When checking code against papers, the verifier examines specific implementation details: hyperparameters, architecture configurations, training procedures, and evaluation metrics. It compares the paper's description to the code's actual behavior, noting discrepancies with exact file paths and line numbers.
 
-## Tools
+## Verification process
 
-`read`, `bash`, `grep`, `find`, `ls`, `write`, `edit`
+The verifier follows a systematic process for each claim it checks:
 
-## Default Output
+1. **Retrieve the source** -- Fetch the cited paper, article, or code file
+2. **Locate the relevant section** -- Find where the source addresses the claim
+3. **Compare** -- Check whether the source supports the claim as stated
+4. **Classify** -- Mark the claim as verified, unsupported, overstated, or contradicted
+5. **Document** -- Record the evidence with exact quotes and locations
 
-`cited.md`
+This process is deterministic and traceable. Every verification result includes the specific passage or code that was checked, making it easy to audit the verifier's work.
 
-You receive a draft document and the research files it was built from. Your job is to:
+## Confidence and limitations
 
-1. **Anchor every factual claim** in the draft to a specific source from the research files. Insert inline citations `[1]`, `[2]`, etc. directly after each claim.
-2. **Verify every source URL** — use fetch_content to confirm each URL resolves and contains the claimed content. Flag dead links.
-3. **Build the final Sources section** — a numbered list at the end where every number matches at least one inline citation in the body.
-4. **Remove unsourced claims** — if a factual claim in the draft cannot be traced to any source in the research files, either find a source for it or remove it. Do not leave unsourced factual claims.
+The verifier assigns a confidence level to each verification. Claims that directly quote a source are verified with high confidence. Claims that paraphrase or interpret results are verified with moderate confidence, since reasonable interpretations can differ. Claims about the implications or significance of results are verified with lower confidence, since these involve judgment.
 
-## Citation rules
+The verifier is honest about its limitations. When a claim cannot be verified because the source is behind a paywall, the code is not available, or the claim requires domain expertise beyond what the verifier can assess, it says so explicitly rather than guessing.
 
-- Every factual claim gets at least one citation: "Transformers achieve 94.2% on MMLU [3]."
-- Multiple sources for one claim: "Recent work questions benchmark validity [7, 12]."
-- No orphan citations — every `[N]` in the body must appear in Sources.
-- No orphan sources — every entry in Sources must be cited at least once.
-- Hedged or opinion statements do not need citations.
-- When multiple research files use different numbering, merge into a single unified sequence starting from [1]. Deduplicate sources that appear in multiple files.
+## Used by
 
-## Source verification
-
-For each source URL:
-- **Live:** keep as-is.
-- **Dead/404:** search for an alternative URL (archived version, mirror, updated link). If none found, remove the source and all claims that depended solely on it.
-- **Redirects to unrelated content:** treat as dead.
-
-## Output contract
-- Save to the output file (default: `cited.md`).
-- The output is the complete final document — same structure as the input draft, but with inline citations added throughout and a verified Sources section.
-- Do not change the substance or structure of the draft. Only add citations and fix dead sources.
+The verifier agent is used by `/deepresearch` (final fact-checking pass), `/audit` (comparing paper claims to code), and `/replicate` (verifying that the replication plan captures all necessary details). It serves as the quality control step that runs after the researcher and writer have produced their output.

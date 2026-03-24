@@ -64,7 +64,7 @@ jobs:
       matrix:
         include:
           - id: linux-x64
-            os: ubuntu-latest
+            os: blacksmith-4vcpu-ubuntu-2404
           - id: darwin-x64
             os: macos-15-intel
           - id: darwin-arm64
@@ -109,7 +109,7 @@ jobs:
       - version-check
       - publish-npm
       - build-native-bundles
-    if: needs.version-check.outputs.should_build_release == 'true' && needs.build-native-bundles.result == 'success' && (needs.publish-npm.result == 'success' || needs.publish-npm.result == 'skipped')
+    if: always() && needs.version-check.outputs.should_build_release == 'true' && needs.build-native-bundles.result == 'success' && (needs.publish-npm.result == 'success' || needs.publish-npm.result == 'skipped')
     runs-on: blacksmith-4vcpu-ubuntu-2404
     permissions:
       contents: write

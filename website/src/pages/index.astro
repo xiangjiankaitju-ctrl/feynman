@@ -1,169 +1,277 @@
 ---
-import Base from '../layouts/Base.astro';
+import Layout from "@/layouts/main.astro"
+import { Button } from "@/components/ui/button"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
+import { Badge } from "@/components/ui/badge"
+import { Star } from "lucide-react"
+
+const workflows = [
+  { command: "/deepresearch", description: "Run a multi-step research pipeline on any scientific question" },
+  { command: "/lit", description: "Search and summarize relevant literature from multiple databases" },
+  { command: "/review", description: "Get an AI-powered peer review of any paper or manuscript" },
+  { command: "/audit", description: "Audit methodology, statistics, and reproducibility of a study" },
+  { command: "/replicate", description: "Attempt to reproduce key findings with available data" },
+  { command: "/compare", description: "Compare and contrast multiple papers side by side" },
+  { command: "/draft", description: "Draft a manuscript section from your research notes and sources" },
+  { command: "/autoresearch", description: "Autonomous research loop that iterates until a question is answered" },
+  { command: "/watch", description: "Monitor topics or authors for new publications and preprints" },
+]
+
+const agents = [
+  { name: "Researcher", description: "Searches databases, reads papers, extracts findings" },
+  { name: "Reviewer", description: "Evaluates methodology, identifies gaps, checks claims" },
+  { name: "Writer", description: "Synthesizes sources into structured prose and citations" },
+  { name: "Verifier", description: "Cross-references claims, checks data, validates results" },
+]
+
+const sources = [
+  { name: "AlphaXiv", description: "Real-time access to arXiv papers with community annotations", href: "https://alphaxiv.org" },
+  { name: "Web search", description: "Search the open web for supplementary context and data" },
+  { name: "Preview", description: "More source integrations coming soon" },
+]
+
+const terminalCommands = [
+  { command: "feynman /deepresearch \"What causes Alzheimer's disease?\"", description: "Run a multi-step deep research pipeline" },
+  { command: "feynman /lit \"CRISPR gene therapy 2024\"", description: "Search and summarize recent literature" },
+  { command: "feynman /review ./my-paper.pdf", description: "Get an AI peer review of your manuscript" },
+  { command: "feynman /audit 2401.12345", description: "Audit a paper's methodology and statistics" },
+  { command: "feynman /watch \"transformer architectures\"", description: "Monitor a topic for new publications" },
+]
 ---
 
-<Base title="Feynman — The open source AI research agent" active="home">
-  <section class="text-center pt-24 pb-20 px-6">
-    <div class="max-w-2xl mx-auto">
-      <h1 class="text-5xl sm:text-6xl font-bold tracking-tight mb-6" style="text-wrap: balance">Research from the command line</h1>
-      <p class="text-lg text-text-muted mb-10 leading-relaxed" style="text-wrap: pretty">Feynman reads papers, searches the web, writes drafts, runs experiments, and cites every claim. Open source. Runs locally.</p>
-      <button id="copy-btn" class="group inline-flex items-center justify-between gap-3 bg-surface rounded-lg px-5 py-3 mb-8 font-mono text-sm border border-border hover:border-accent/40 hover:text-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent max-w-full" aria-label="Copy install command">
-        <code class="text-accent text-left">curl -fsSL https://feynman.is/install | bash</code>
-        <span id="copy-icon" class="shrink-0 text-text-dim group-hover:text-accent transition-colors" aria-hidden="true">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
-        </span>
-      </button>
-      <div class="flex gap-4 justify-center flex-wrap">
-        <a href="/docs/getting-started/installation" class="px-6 py-2.5 rounded-lg bg-accent text-bg font-semibold text-sm hover:bg-accent-hover transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg">Get started</a>
-        <a href="https://github.com/getcompanion-ai/feynman" target="_blank" rel="noopener" class="px-6 py-2.5 rounded-lg border border-border text-text-muted font-semibold text-sm hover:border-text-dim hover:text-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg">GitHub</a>
-      </div>
-    </div>
-    <div class="max-w-4xl mx-auto mt-16">
-      <img src="/hero-raw.png" alt="Feynman CLI" class="w-full" />
-    </div>
-  </section>
+<Layout title="Feynman - The open source AI research agent" active="home">
+  <div class="mx-auto max-w-5xl px-6">
 
-  <section class="py-20 px-6">
-    <div class="max-w-5xl mx-auto">
-      <h2 class="text-2xl font-bold text-center mb-4">Ask a question, get a cited answer</h2>
-      <p class="text-center text-text-muted mb-12 max-w-xl mx-auto">Feynman dispatches research agents that search papers, crawl the web, and synthesize findings with inline citations back to the source.</p>
-      <div class="bg-surface rounded-xl p-6 font-mono text-sm leading-loose max-w-2xl mx-auto border border-border">
-        <div class="flex gap-4"><span class="text-text-dim shrink-0">$</span><span><span class="text-accent">feynman</span> "what do we know about scaling laws"</span></div>
-        <div class="text-text-dim mt-1 ml-6 text-xs">Searches papers and web, produces a cited research brief</div>
-        <div class="mt-4 flex gap-4"><span class="text-text-dim shrink-0">$</span><span><span class="text-accent">feynman</span> deepresearch "mechanistic interpretability"</span></div>
-        <div class="text-text-dim mt-1 ml-6 text-xs">Multi-agent deep dive with parallel researchers, synthesis, and verification</div>
-        <div class="mt-4 flex gap-4"><span class="text-text-dim shrink-0">$</span><span><span class="text-accent">feynman</span> lit "RLHF alternatives"</span></div>
-        <div class="text-text-dim mt-1 ml-6 text-xs">Literature review covering consensus, disagreements, and open questions</div>
-        <div class="mt-4 flex gap-4"><span class="text-text-dim shrink-0">$</span><span><span class="text-accent">feynman</span> audit 2401.12345</span></div>
-        <div class="text-text-dim mt-1 ml-6 text-xs">Compares paper claims against the public codebase</div>
-        <div class="mt-4 flex gap-4"><span class="text-text-dim shrink-0">$</span><span><span class="text-accent">feynman</span> replicate "chain-of-thought improves math"</span></div>
-        <div class="text-text-dim mt-1 ml-6 text-xs">Builds a replication plan, picks a compute target, runs the experiment</div>
+    <!-- Hero -->
+    <section class="flex flex-col items-center gap-8 pb-16 pt-20 text-center">
+      <div class="flex max-w-3xl flex-col gap-4">
+        <h1 class="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+          The open source AI<br />research agent
+        </h1>
+        <p class="mx-auto max-w-2xl text-lg text-muted-foreground">
+          Discover, analyze, and synthesize scientific literature from your terminal.
+          Feynman orchestrates AI agents to do the heavy lifting so you can focus on what matters.
+        </p>
       </div>
-    </div>
-  </section>
 
-  <section class="py-20 px-6">
-    <div class="max-w-5xl mx-auto">
-      <h2 class="text-2xl font-bold text-center mb-4">Workflows</h2>
-      <p class="text-center text-text-muted mb-10 max-w-xl mx-auto">Structured research workflows you can trigger with a slash command or just ask for in natural language.</p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
-        <div class="bg-surface rounded-xl p-5 border border-border">
-          <div class="font-mono text-sm text-accent mb-2">/deepresearch</div>
-          <p class="text-sm text-text-muted">Multi-agent investigation across papers, web, and code</p>
-        </div>
-        <div class="bg-surface rounded-xl p-5 border border-border">
-          <div class="font-mono text-sm text-accent mb-2">/lit</div>
-          <p class="text-sm text-text-muted">Literature review from primary sources with consensus mapping</p>
-        </div>
-        <div class="bg-surface rounded-xl p-5 border border-border">
-          <div class="font-mono text-sm text-accent mb-2">/review</div>
-          <p class="text-sm text-text-muted">Simulated peer review with severity scores and a revision plan</p>
-        </div>
-        <div class="bg-surface rounded-xl p-5 border border-border">
-          <div class="font-mono text-sm text-accent mb-2">/audit</div>
-          <p class="text-sm text-text-muted">Check paper claims against what the code actually does</p>
-        </div>
-        <div class="bg-surface rounded-xl p-5 border border-border">
-          <div class="font-mono text-sm text-accent mb-2">/replicate</div>
-          <p class="text-sm text-text-muted">Design and run a replication in a sandboxed Docker container</p>
-        </div>
-        <div class="bg-surface rounded-xl p-5 border border-border">
-          <div class="font-mono text-sm text-accent mb-2">/compare</div>
-          <p class="text-sm text-text-muted">Side-by-side source comparison with agreement and conflict matrix</p>
-        </div>
-        <div class="bg-surface rounded-xl p-5 border border-border">
-          <div class="font-mono text-sm text-accent mb-2">/draft</div>
-          <p class="text-sm text-text-muted">Turn research findings into a polished paper-style draft</p>
-        </div>
-        <div class="bg-surface rounded-xl p-5 border border-border">
-          <div class="font-mono text-sm text-accent mb-2">/autoresearch</div>
-          <p class="text-sm text-text-muted">Hypothesis &rarr; experiment &rarr; measure &rarr; repeat</p>
-        </div>
-        <div class="bg-surface rounded-xl p-5 border border-border">
-          <div class="font-mono text-sm text-accent mb-2">/watch</div>
-          <p class="text-sm text-text-muted">Recurring monitor for new papers, code, or product updates</p>
+      <div class="flex flex-col items-center gap-4">
+        <button
+          id="install-cmd"
+          class="group flex items-center gap-3 rounded-lg bg-muted px-4 py-2.5 font-mono text-sm transition-colors hover:bg-muted/80 cursor-pointer"
+        >
+          <span class="text-muted-foreground">$</span>
+          <span>curl -fsSL https://feynman.is/install | bash</span>
+          <svg
+            id="copy-icon"
+            class="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+            stroke="currentColor"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+          </svg>
+          <svg
+            id="check-icon"
+            class="hidden size-4 shrink-0 text-primary"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+            stroke="currentColor"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+          </svg>
+        </button>
+
+        <div class="flex items-center gap-3">
+          <a href="/docs">
+            <Button client:load size="lg">
+              Get Started
+            </Button>
+          </a>
+          <a href="https://github.com/getcompanion-ai/feynman" target="_blank" rel="noopener noreferrer" class="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground">
+            GitHub
+            <span id="star-badge" class="hidden inline-flex items-center gap-1 text-muted-foreground">
+              <span id="star-count"></span>
+              <Star client:load size={14} fill="currentColor" />
+            </span>
+          </a>
         </div>
       </div>
-    </div>
-  </section>
 
-  <section class="py-20 px-6">
-    <div class="max-w-5xl mx-auto">
-      <h2 class="text-2xl font-bold text-center mb-4">Agents that do the work</h2>
-      <p class="text-center text-text-muted mb-10 max-w-xl mx-auto">Feynman dispatches specialized agents behind the scenes. You ask a question &mdash; the right team assembles.</p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-surface rounded-xl p-6 text-center border border-border">
-          <div class="font-semibold text-accent mb-2">Researcher</div>
-          <p class="text-sm text-text-muted">Hunts for evidence across papers, the web, repos, and docs</p>
+      <img src="/hero.png" class="w-full" alt="Feynman terminal demo" />
+    </section>
+
+
+    <!-- Terminal demo -->
+    <section class="py-16">
+      <div class="flex flex-col items-center gap-8 text-center">
+        <div class="flex flex-col gap-2">
+          <h2 class="text-2xl font-bold tracking-tight sm:text-3xl">Powerful from the command line</h2>
+          <p class="text-muted-foreground">Run research workflows with simple commands.</p>
         </div>
-        <div class="bg-surface rounded-xl p-6 text-center border border-border">
-          <div class="font-semibold text-accent mb-2">Reviewer</div>
-          <p class="text-sm text-text-muted">Grades claims by severity, flags gaps, and suggests revisions</p>
+        <Card client:load className="w-full text-left">
+          <CardContent client:load>
+            <div class="flex flex-col gap-3 font-mono text-sm">
+              {terminalCommands.map((cmd) => (
+                <div class="flex flex-col gap-0.5">
+                  <div>
+                    <span class="text-muted-foreground">$ </span>
+                    <span class="text-primary">{cmd.command}</span>
+                  </div>
+                  <div class="text-xs text-muted-foreground">{cmd.description}</div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </section>
+
+
+    <!-- Workflows -->
+    <section class="py-16">
+      <div class="flex flex-col items-center gap-8 text-center">
+        <div class="flex flex-col gap-2">
+          <h2 class="text-2xl font-bold tracking-tight sm:text-3xl">Built-in workflows</h2>
+          <p class="text-muted-foreground">Pre-configured research workflows you can run with a single command.</p>
         </div>
-        <div class="bg-surface rounded-xl p-6 text-center border border-border">
-          <div class="font-semibold text-accent mb-2">Writer</div>
-          <p class="text-sm text-text-muted">Structures notes into briefs, drafts, and paper-style output</p>
-        </div>
-        <div class="bg-surface rounded-xl p-6 text-center border border-border">
-          <div class="font-semibold text-accent mb-2">Verifier</div>
-          <p class="text-sm text-text-muted">Checks every citation, verifies URLs, removes dead links</p>
+        <div class="grid w-full gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {workflows.map((wf) => (
+            <Card client:load size="sm">
+              <CardHeader client:load>
+                <CardTitle client:load className="font-mono text-sm text-primary">{wf.command}</CardTitle>
+                <CardDescription client:load>{wf.description}</CardDescription>
+              </CardHeader>
+            </Card>
+          ))}
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="py-20 px-6">
-    <div class="max-w-5xl mx-auto">
-      <h2 class="text-2xl font-bold text-center mb-4">Sources</h2>
-      <p class="text-center text-text-muted mb-10 max-w-xl mx-auto">Where Feynman finds information and what it uses to build answers.</p>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
-        <div class="bg-surface rounded-xl p-5 border border-border">
-          <div class="font-semibold mb-1"><a href="https://www.alphaxiv.org/" class="text-accent hover:underline">AlphaXiv</a></div>
-          <p class="text-sm text-text-muted">Paper search, Q&A, code reading, and persistent annotations</p>
-        </div>
-        <div class="bg-surface rounded-xl p-5 border border-border">
-          <div class="font-semibold mb-1">Web search</div>
-          <p class="text-sm text-text-muted">Gemini or Perplexity, zero-config by default</p>
-        </div>
-        <div class="bg-surface rounded-xl p-5 border border-border">
-          <div class="font-semibold mb-1">Preview</div>
-          <p class="text-sm text-text-muted">Browser and PDF export of generated artifacts</p>
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <section class="py-20 px-6">
-    <div class="max-w-5xl mx-auto">
-      <h2 class="text-2xl font-bold text-center mb-4">Compute</h2>
-      <p class="text-center text-text-muted mb-10 max-w-xl mx-auto">Experiments run in sandboxed Docker containers on your machine. Your code stays local.</p>
-      <div class="grid grid-cols-1 gap-4 max-w-md mx-auto">
-        <div class="bg-surface rounded-xl p-5 border border-border">
-          <div class="font-semibold mb-1"><a href="https://www.docker.com/" class="text-accent hover:underline">Docker</a></div>
-          <p class="text-sm text-text-muted">Isolated container execution for safe local experiments</p>
+    <!-- Agents -->
+    <section class="py-16">
+      <div class="flex flex-col items-center gap-8 text-center">
+        <div class="flex flex-col gap-2">
+          <h2 class="text-2xl font-bold tracking-tight sm:text-3xl">Specialized agents</h2>
+          <p class="text-muted-foreground">Each agent is purpose-built for a specific part of the research process.</p>
+        </div>
+        <div class="grid w-full gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {agents.map((agent) => (
+            <Card client:load size="sm" className="text-center">
+              <CardHeader client:load className="items-center">
+                <CardTitle client:load>{agent.name}</CardTitle>
+                <CardDescription client:load>{agent.description}</CardDescription>
+              </CardHeader>
+            </Card>
+          ))}
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="py-20 px-6 text-center">
-    <div class="max-w-xl mx-auto">
-      <p class="text-text-muted mb-6">Built on <a href="https://github.com/badlogic/pi-mono" class="text-accent hover:underline">Pi</a> and <a href="https://www.alphaxiv.org/" class="text-accent hover:underline">alphaXiv</a>. MIT licensed. Open source.</p>
-      <div class="flex gap-4 justify-center flex-wrap">
-        <a href="/docs/getting-started/installation" class="px-6 py-2.5 rounded-lg bg-accent text-bg font-semibold text-sm hover:bg-accent-hover transition-colors">Get started</a>
-        <a href="https://github.com/getcompanion-ai/feynman" target="_blank" rel="noopener" class="px-6 py-2.5 rounded-lg border border-border text-text-muted font-semibold text-sm hover:border-text-dim hover:text-text-primary transition-colors">GitHub</a>
+
+    <!-- Sources -->
+    <section class="py-16">
+      <div class="flex flex-col items-center gap-8 text-center">
+        <div class="flex flex-col gap-2">
+          <h2 class="text-2xl font-bold tracking-tight sm:text-3xl">Connected sources</h2>
+          <p class="text-muted-foreground">Pull data from multiple sources to build a complete picture.</p>
+        </div>
+        <div class="grid w-full gap-4 sm:grid-cols-3">
+          {sources.map((source) => (
+            <Card client:load size="sm" className="text-center">
+              <CardHeader client:load className="items-center">
+                <CardTitle client:load>
+                  {source.href ? (
+                    <a href={source.href} target="_blank" rel="noopener noreferrer" class="underline underline-offset-4 hover:text-primary">
+                      {source.name}
+                    </a>
+                  ) : (
+                    source.name
+                  )}
+                </CardTitle>
+                <CardDescription client:load>{source.description}</CardDescription>
+              </CardHeader>
+            </Card>
+          ))}
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <script is:inline>
-    document.getElementById('copy-btn').addEventListener('click', function() {
-      navigator.clipboard.writeText('curl -fsSL https://feynman.is/install | bash');
-      var icon = document.getElementById('copy-icon');
-      icon.innerHTML = '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
-      setTimeout(function() {
-        icon.innerHTML = '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
-      }, 2000);
-    });
-  </script>
-</Base>
+
+    <!-- Compute -->
+    <section class="py-16">
+      <div class="flex flex-col items-center gap-8 text-center">
+        <div class="flex flex-col gap-2">
+          <h2 class="text-2xl font-bold tracking-tight sm:text-3xl">Sandboxed compute</h2>
+          <p class="text-muted-foreground">Execute code and run experiments in isolated environments.</p>
+        </div>
+        <Card client:load size="sm" className="w-full max-w-md text-center">
+          <CardHeader client:load className="items-center">
+            <CardTitle client:load>Docker</CardTitle>
+            <CardDescription client:load>
+              Run code, install packages, and execute experiments in secure Docker containers.
+              Results are streamed back to your terminal in real time.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    </section>
+
+
+    <!-- Footer CTA -->
+    <section class="flex flex-col items-center gap-6 py-20 text-center">
+      <h2 class="text-2xl font-bold tracking-tight sm:text-3xl">Start researching</h2>
+      <p class="max-w-lg text-muted-foreground">
+        Install Feynman in seconds and run your first research workflow from the terminal.
+      </p>
+      <div class="flex items-center gap-3">
+        <a href="/docs">
+          <Button client:load size="lg">
+            Read the Docs
+          </Button>
+        </a>
+        <a href="https://github.com/getcompanion-ai/feynman" target="_blank" rel="noopener noreferrer">
+          <Button client:load variant="outline" size="lg">
+            View on GitHub
+          </Button>
+        </a>
+      </div>
+    </section>
+
+  </div>
+</Layout>
+
+<script is:inline>
+  document.getElementById("install-cmd").addEventListener("click", function () {
+    var text = "curl -fsSL https://feynman.is/install | bash"
+    navigator.clipboard.writeText(text).then(function () {
+      var copyIcon = document.getElementById("copy-icon")
+      var checkIcon = document.getElementById("check-icon")
+      copyIcon.classList.add("hidden")
+      checkIcon.classList.remove("hidden")
+      setTimeout(function () {
+        copyIcon.classList.remove("hidden")
+        checkIcon.classList.add("hidden")
+      }, 2000)
+    })
+  })
+
+  fetch("https://api.github.com/repos/getcompanion-ai/feynman")
+    .then(function(r) { return r.json() })
+    .then(function(d) {
+      if (d.stargazers_count !== undefined) {
+        var el = document.getElementById("star-count")
+        if (el) {
+          el.textContent = d.stargazers_count >= 1000 ? (d.stargazers_count / 1000).toFixed(1) + "k" : String(d.stargazers_count)
+          var badge = document.getElementById("star-badge")
+          if (badge) badge.classList.remove("hidden")
+        }
+      }
+    })
+    .catch(function() {})
+</script>

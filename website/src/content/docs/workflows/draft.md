@@ -1,37 +1,51 @@
 ---
 title: Draft Writing
-description: Paper-style draft generation from research findings
+description: Generate a paper-style draft from research findings and session context.
 section: Workflows
 order: 7
 ---
 
+The draft writing workflow generates structured academic-style documents from your research findings. It uses the writer agent to produce well-organized prose with proper citations, sections, and formatting suitable for papers, reports, or blog posts.
+
 ## Usage
 
-```
-/draft <topic>
-```
-
-## What it does
-
-Produces a paper-style draft with structured sections. Writes to `papers/`.
-
-## Structure
-
-The generated draft includes:
-
-- Title
-- Abstract
-- Introduction / Background
-- Method or Approach
-- Evidence and Analysis
-- Limitations
-- Conclusion
-- Sources
-
-## Example
+From the REPL:
 
 ```
-/draft survey of differentiable physics simulators
+/draft A survey of retrieval-augmented generation techniques
 ```
 
-The writer agent works only from supplied evidence — it never fabricates content. If evidence is insufficient, it explicitly notes the gaps.
+```
+/draft --from-session
+```
+
+From the CLI:
+
+```bash
+feynman draft "A survey of retrieval-augmented generation techniques"
+```
+
+When used with `--from-session`, the writer draws from the current session's research findings, making it a natural follow-up to a deep research or literature review workflow.
+
+## How it works
+
+The draft workflow leverages the writer agent, which specializes in producing structured academic prose. When given a topic, it first consults the researcher agents to gather source material, then organizes the findings into a coherent document with proper narrative flow.
+
+When working from existing session context (after a deep research or literature review), the writer skips the research phase and works directly with the findings already gathered. This produces a more focused draft because the source material has already been vetted and organized.
+
+The writer pays attention to academic conventions: claims are attributed to their sources with inline citations, methodology sections describe procedures precisely, and limitations are discussed honestly. The draft includes placeholder sections for any content the writer cannot generate from available sources, clearly marking what needs human input.
+
+## Output format
+
+The draft follows standard academic structure:
+
+- **Abstract** -- Concise summary of the document's scope and findings
+- **Introduction** -- Motivation, context, and contribution statement
+- **Body Sections** -- Organized by topic with subsections as needed
+- **Discussion** -- Interpretation of findings and implications
+- **Limitations** -- Honest assessment of scope and gaps
+- **References** -- Complete bibliography in a consistent citation format
+
+## Preview and iteration
+
+After generating the draft, use `/preview` to render it as HTML or PDF with proper formatting, math rendering, and typography. You can iterate on the draft by asking Feynman to revise specific sections, add more detail, or restructure the argument.

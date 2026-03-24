@@ -1,66 +1,84 @@
 ---
 title: Configuration
-description: Configure models, search, and runtime options
+description: Understand Feynman's configuration files and environment variables.
 section: Getting Started
 order: 4
 ---
 
-## Model
+Feynman stores all configuration and state under `~/.feynman/`. This directory is created on first run and contains settings, authentication tokens, session history, and installed packages.
 
-Set the default model:
+## Directory structure
 
-```bash
-feynman model set <provider:model>
+```
+~/.feynman/
+├── settings.json       # Core configuration
+├── web-search.json     # Web search routing config
+├── auth/               # OAuth tokens and API keys
+├── sessions/           # Persisted conversation history
+├── packages/           # Installed optional packages
+└── bin/                # Binary (when installed via the native installer)
 ```
 
-Override at runtime:
+The `settings.json` file is the primary configuration file. It is created by `feynman setup` and can be edited manually. A typical configuration looks like:
 
-```bash
-feynman --model anthropic:claude-opus-4-6
+```json
+{
+  "defaultModel": "anthropic:claude-sonnet-4-20250514",
+  "thinkingLevel": "medium"
+}
 ```
 
-List available models:
+## Model configuration
+
+The `defaultModel` field sets which model is used when you launch Feynman without the `--model` flag. The format is `provider:model-name`. You can change it via the CLI:
+
+```bash
+feynman model set anthropic:claude-opus-4-20250514
+```
+
+To see all models you have configured:
 
 ```bash
 feynman model list
 ```
 
-## Thinking level
+## Thinking levels
 
-Control the reasoning depth:
+The `thinkingLevel` field controls how much reasoning the model does before responding. Available levels are `off`, `minimal`, `low`, `medium`, `high`, and `xhigh`. Higher levels produce more thorough analysis at the cost of latency and token usage. You can override per-session:
 
 ```bash
 feynman --thinking high
 ```
 
-Levels: `off`, `minimal`, `low`, `medium`, `high`, `xhigh`.
+## Environment variables
 
-## Web search
+Feynman respects the following environment variables, which take precedence over `settings.json`:
 
-Check the current search configuration:
-
-```bash
-feynman search status
-```
-
-For advanced configuration, edit `~/.feynman/web-search.json` directly to set Gemini API keys, Perplexity keys, or a different route.
-
-## Working directory
-
-```bash
-feynman --cwd /path/to/project
-```
+| Variable | Description |
+| --- | --- |
+| `FEYNMAN_MODEL` | Override the default model |
+| `FEYNMAN_HOME` | Override the config directory (default: `~/.feynman`) |
+| `FEYNMAN_THINKING` | Override the thinking level |
+| `ANTHROPIC_API_KEY` | Anthropic API key |
+| `OPENAI_API_KEY` | OpenAI API key |
+| `GOOGLE_API_KEY` | Google AI API key |
+| `TAVILY_API_KEY` | Tavily web search API key |
+| `SERPER_API_KEY` | Serper web search API key |
 
 ## Session storage
 
-```bash
-feynman --session-dir /path/to/sessions
-```
-
-## One-shot mode
-
-Run a single prompt and exit:
+Each conversation is persisted as a JSON file in `~/.feynman/sessions/`. To start a fresh session:
 
 ```bash
-feynman --prompt "summarize the key findings of 2401.12345"
+feynman --new-session
 ```
+
+To point sessions at a different directory (useful for per-project session isolation):
+
+```bash
+feynman --session-dir ~/myproject/.feynman/sessions
+```
+
+## Diagnostics
+
+Run `feynman doctor` to verify your configuration is valid, check authentication status for all configured providers, and detect missing optional dependencies. The doctor command outputs a checklist showing what is working and what needs attention.

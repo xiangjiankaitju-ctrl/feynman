@@ -1,44 +1,60 @@
 ---
 title: Quick Start
-description: Get up and running with Feynman in 60 seconds
+description: Get up and running with Feynman in under five minutes.
 section: Getting Started
 order: 2
 ---
 
-## First run
+This guide assumes you have already [installed Feynman](/docs/getting-started/installation) and run `feynman setup`. If not, start there first.
+
+## Launch the REPL
+
+Start an interactive session by running:
 
 ```bash
-feynman setup
 feynman
 ```
 
-`feynman setup` walks you through model authentication, alphaXiv login, web search configuration, and preview dependencies.
+You are dropped into a conversational REPL where you can ask research questions, run workflows, and interact with agents in natural language. Type your question and press Enter.
 
-## Ask naturally
+## Run a one-shot prompt
 
-Feynman routes your questions into the right workflow automatically. You don't need slash commands to get started.
+If you want a quick answer without entering the REPL, use the `--prompt` flag:
 
-```
-> What are the main approaches to RLHF alignment?
-```
-
-Feynman will search papers, gather web sources, and produce a structured answer with citations.
-
-## Use workflows directly
-
-For explicit control, use slash commands inside the REPL:
-
-```
-> /deepresearch transformer scaling laws
-> /lit multimodal reasoning benchmarks
-> /review paper.pdf
+```bash
+feynman --prompt "Summarize the key findings of Attention Is All You Need"
 ```
 
-## Output locations
+Feynman processes the prompt, prints the response, and exits. This is useful for scripting or piping output into other tools.
 
-Feynman writes durable artifacts to canonical directories:
+## Start a deep research session
 
-- `outputs/` — Reviews, reading lists, summaries
-- `papers/` — Polished paper-style drafts
-- `experiments/` — Runnable code and result logs
-- `notes/` — Scratch notes and session logs
+Deep research is the flagship workflow. It dispatches multiple agents to search, read, cross-reference, and synthesize information from academic papers and the web:
+
+```bash
+feynman
+> /deepresearch What are the current approaches to mechanistic interpretability in LLMs?
+```
+
+The agents collaborate to produce a structured research report with citations, key findings, and open questions. The full report is saved to your session directory for later reference.
+
+## Work with files
+
+Feynman can read and write files in your working directory. Point it at a paper or codebase for targeted analysis:
+
+```bash
+feynman --cwd ~/papers
+> /review arxiv:2301.07041
+```
+
+You can also ask Feynman to draft documents, audit code, or compare multiple sources by referencing local files directly in your prompts.
+
+## Explore slash commands
+
+Type `/help` inside the REPL to see all available slash commands. Each command maps to a workflow or utility, such as `/deepresearch`, `/review`, `/draft`, `/watch`, and more. You can also run any workflow directly from the CLI:
+
+```bash
+feynman deepresearch "transformer architectures for protein folding"
+```
+
+See the [Slash Commands reference](/docs/reference/slash-commands) for the complete list.

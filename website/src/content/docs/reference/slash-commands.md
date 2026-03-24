@@ -1,41 +1,63 @@
 ---
 title: Slash Commands
-description: Repo-owned REPL slash commands
+description: Complete reference for REPL slash commands.
 section: Reference
 order: 2
 ---
 
-This page documents the slash commands that Feynman owns in this repository: prompt templates from `prompts/` and extension commands from `extensions/research-tools/`.
+Slash commands are available inside the Feynman REPL. They map to research workflows, project management tools, and setup utilities. Type `/help` inside the REPL for the live command list, which may include additional commands from installed Pi packages.
 
-Additional slash commands can appear at runtime from Pi core and bundled packages such as subagents, preview, session search, and scheduling. Use `/help` inside the REPL for the live command list instead of relying on a static copy of package-provided commands.
-
-## Research Workflows
+## Research workflows
 
 | Command | Description |
 | --- | --- |
-| `/deepresearch <topic>` | Run a thorough, source-heavy investigation on a topic and produce a durable research brief with inline citations. |
-| `/lit <topic>` | Run a literature review on a topic using paper search and primary-source synthesis. |
-| `/review <artifact>` | Simulate an AI research peer review with likely objections, severity, and a concrete revision plan. |
-| `/audit <item>` | Compare a paper's claims against its public codebase and identify mismatches, omissions, and reproducibility risks. |
-| `/replicate <paper>` | Plan or execute a replication workflow for a paper, claim, or benchmark. |
-| `/compare <topic>` | Compare multiple sources on a topic and produce a source-grounded matrix of agreements, disagreements, and confidence. |
-| `/draft <topic>` | Turn research findings into a polished paper-style draft with equations, sections, and explicit claims. |
-| `/autoresearch <idea>` | Autonomous experiment loop — try ideas, measure results, keep what works, discard what doesn't, repeat. |
-| `/watch <topic>` | Set up a recurring or deferred research watch on a topic, company, paper area, or product surface. |
+| `/deepresearch <topic>` | Run a thorough, source-heavy investigation and produce a research brief with inline citations |
+| `/lit <topic>` | Run a structured literature review with consensus, disagreements, and open questions |
+| `/review <artifact>` | Simulate a peer review with severity-graded feedback and inline annotations |
+| `/audit <item>` | Compare a paper's claims against its public codebase for mismatches and reproducibility risks |
+| `/replicate <paper>` | Plan or execute a replication workflow for a paper, claim, or benchmark |
+| `/compare <topic>` | Compare multiple sources and produce an agreement/disagreement matrix |
+| `/draft <topic>` | Generate a paper-style draft from research findings |
+| `/autoresearch <idea>` | Start an autonomous experiment loop that iteratively optimizes toward a goal |
+| `/watch <topic>` | Set up recurring research monitoring on a topic |
 
-## Project & Session
+These are the primary commands you will use day-to-day. Each workflow dispatches one or more specialized agents (researcher, reviewer, writer, verifier) depending on the task.
 
-| Command | Description |
-| --- | --- |
-| `/log` | Write a durable session log with completed work, findings, open questions, and next steps. |
-| `/jobs` | Inspect active background research work, including running processes and scheduled follow-ups. |
-| `/help` | Show grouped Feynman commands and prefill the editor with a selected command. |
-| `/init` | Bootstrap AGENTS.md and session-log folders for a research project. |
-
-## Setup
+## Project and session
 
 | Command | Description |
 | --- | --- |
-| `/alpha-login` | Sign in to alphaXiv from inside Feynman. |
-| `/alpha-status` | Show alphaXiv authentication status. |
-| `/alpha-logout` | Clear alphaXiv auth from inside Feynman. |
+| `/log` | Write a durable session log with completed work, findings, open questions, and next steps |
+| `/jobs` | Inspect active background work: running processes, scheduled follow-ups, and active watches |
+| `/help` | Show grouped Feynman commands and prefill the editor with a selected command |
+| `/init` | Bootstrap `AGENTS.md` and session-log folders for a new research project |
+| `/search` | Search prior session transcripts for past research and findings |
+| `/preview` | Preview the current artifact as rendered HTML or PDF |
+
+Session management commands help you organize ongoing work. The `/log` command is particularly useful at the end of a research session to capture what was accomplished and what remains.
+
+## Setup commands
+
+| Command | Description |
+| --- | --- |
+| `/alpha-login` | Sign in to alphaXiv from inside the REPL |
+| `/alpha-status` | Show alphaXiv authentication status |
+| `/alpha-logout` | Clear alphaXiv auth from inside the REPL |
+
+These provide a convenient way to manage alphaXiv authentication without leaving the REPL.
+
+## Running workflows from the CLI
+
+All research workflow slash commands can also be run directly from the command line:
+
+```bash
+feynman deepresearch "topic"
+feynman lit "topic"
+feynman review artifact.md
+feynman audit 2401.12345
+feynman replicate "claim"
+feynman compare "topic"
+feynman draft "topic"
+```
+
+This is equivalent to launching the REPL and typing the slash command. The CLI form is useful for scripting and automation.

@@ -1,78 +1,57 @@
 ---
 title: Setup
-description: Detailed setup guide for Feynman
+description: Walk through the guided setup wizard to configure Feynman.
 section: Getting Started
 order: 3
 ---
 
-## Guided setup
+The `feynman setup` wizard configures your model provider, API keys, and optional packages. It runs automatically on first launch, but you can re-run it at any time to change your configuration.
+
+## Running setup
 
 ```bash
 feynman setup
 ```
 
-This walks through four steps:
+The wizard walks you through three stages: model configuration, authentication, and optional package installation.
 
-### Model provider authentication
+## Stage 1: Model selection
 
-Feynman uses Pi's OAuth system for model access. The setup wizard prompts you to log in to your preferred provider.
+Feynman supports multiple model providers. The setup wizard presents a list of available providers and models. Select your preferred default model using the arrow keys:
 
-```bash
-feynman model login
+```
+? Select your default model:
+  anthropic:claude-sonnet-4-20250514
+> anthropic:claude-opus-4-20250514
+  openai:gpt-4o
+  openai:o3
+  google:gemini-2.5-pro
 ```
 
-### AlphaXiv login
+The model you choose here becomes the default for all sessions. You can override it per-session with the `--model` flag or change it later via `feynman model set <provider:model>`.
 
-AlphaXiv powers Feynman's paper search and analysis tools. Sign in with:
+## Stage 2: Authentication
 
-```bash
-feynman alpha login
+Depending on your chosen provider, setup prompts you for an API key or walks you through OAuth login. For providers that support Pi OAuth (like Anthropic and OpenAI), Feynman opens a browser window to complete the sign-in flow. Your credentials are stored securely in the Pi auth storage at `~/.feynman/`.
+
+For API key providers, you are prompted to paste your key directly:
+
+```
+? Enter your API key: sk-ant-...
 ```
 
-Check status anytime:
+Keys are encrypted at rest and never sent anywhere except the provider's API endpoint.
 
-```bash
-feynman alpha status
-```
+## Stage 3: Optional packages
 
-### Web search routing
+Feynman's core ships with the essentials, but some features require additional packages. The wizard asks if you want to install optional presets:
 
-Feynman supports three web search backends:
+- **session-search** -- Enables searching prior session transcripts for past research
+- **memory** -- Automatic preference and correction memory across sessions
+- **generative-ui** -- Interactive HTML-style widgets for rich output
 
-- **auto** — Prefer Perplexity when configured, fall back to Gemini
-- **perplexity** — Force Perplexity Sonar
-- **gemini** — Force Gemini (default, zero-config via signed-in Chromium)
+You can skip this step and install packages later with `feynman packages install <preset>`.
 
-The default path requires no API keys — it uses Gemini Browser via your signed-in Chromium profile.
+## Re-running setup
 
-### Preview dependencies
-
-For PDF and HTML export of generated artifacts, Feynman needs `pandoc`:
-
-```bash
-feynman --setup-preview
-```
-
-Global macOS installs also try to install pandoc automatically when Homebrew is available. Use the command above to retry manually.
-
-### Optional packages
-
-Feynman keeps the default package set lean so first-run installs stay fast. Install the heavier optional packages only when you need them:
-
-```bash
-feynman packages list
-feynman packages install memory
-feynman packages install session-search
-feynman packages install generative-ui
-feynman packages install all-extras
-```
-
-## Diagnostics
-
-Run the doctor to check everything:
-
-```bash
-feynman doctor
-```
-
-This verifies model auth, alphaXiv credentials, preview dependencies, and the Pi runtime.
+Configuration is stored in `~/.feynman/settings.json`. Running `feynman setup` again overwrites previous settings. If you only need to change a specific value, edit the config file directly or use the targeted commands like `feynman model set` or `feynman alpha login`.

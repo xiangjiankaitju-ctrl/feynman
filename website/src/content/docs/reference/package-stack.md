@@ -1,36 +1,76 @@
 ---
 title: Package Stack
-description: Curated Pi packages bundled with Feynman
+description: Core and optional Pi packages bundled with Feynman.
 section: Reference
 order: 3
 ---
 
-Curated Pi packages bundled with Feynman. The runtime package list lives in `.feynman/settings.json`.
+Feynman is built on the Pi runtime and uses curated Pi packages for its capabilities. Packages are managed through `feynman packages` commands and configured in `~/.feynman/settings.json`.
 
 ## Core packages
 
-Installed by default.
+These are installed by default with every Feynman installation. They provide the foundation for all research workflows.
 
 | Package | Purpose |
-|---------|---------|
-| `pi-subagents` | Parallel literature gathering and decomposition. |
-| `pi-btw` | Fast side-thread `/btw` conversations without interrupting the main run. |
-| `pi-docparser` | PDFs, Office docs, spreadsheets, and images. |
-| `pi-web-access` | Web, GitHub, PDF, and media access. |
-| `pi-markdown-preview` | Polished Markdown and LaTeX-heavy research writeups. |
-| `@walterra/pi-charts` | Charts and quantitative visualizations. |
-| `pi-mermaid` | Diagrams in the TUI. |
-| `@aliou/pi-processes` | Long-running experiments and log tails. |
-| `pi-zotero` | Citation-library workflows. |
-| `pi-schedule-prompt` | Recurring and deferred research jobs. |
-| `@tmustier/pi-ralph-wiggum` | Long-running agent loops for iterative development. |
+| --- | --- |
+| `pi-subagents` | Parallel agent spawning for literature gathering and task decomposition. Powers the multi-agent workflows |
+| `pi-btw` | Fast side-thread `/btw` conversations without interrupting the main research run |
+| `pi-docparser` | Parse PDFs, Office documents, spreadsheets, and images for content extraction |
+| `pi-web-access` | Web browsing, GitHub access, PDF fetching, and media retrieval |
+| `pi-markdown-preview` | Render Markdown and LaTeX-heavy research documents as polished HTML/PDF |
+| `@walterra/pi-charts` | Generate charts and quantitative visualizations from data |
+| `pi-mermaid` | Render Mermaid diagrams in the terminal UI |
+| `@aliou/pi-processes` | Manage long-running experiments, background tasks, and log tailing |
+| `pi-zotero` | Integration with Zotero for citation library management |
+| `pi-schedule-prompt` | Schedule recurring and deferred research jobs. Powers the `/watch` workflow |
+| `@tmustier/pi-ralph-wiggum` | Long-running agent loops for iterative development. Powers `/autoresearch` |
+
+These packages are updated together when you run `feynman update`. You do not need to install them individually.
 
 ## Optional packages
 
-Install on demand with `feynman packages install <preset>`.
+Install on demand with `feynman packages install <preset>`. These extend Feynman with capabilities that not every user needs.
 
-| Package | Purpose |
-|---------|---------|
-| `pi-generative-ui` | Interactive HTML-style widgets. |
-| `@kaiserlich-dev/pi-session-search` | Indexed session recall and summarize/resume UI. |
-| `@samfp/pi-memory` | Automatic preference and correction memory across sessions. |
+| Package | Preset | Purpose |
+| --- | --- | --- |
+| `pi-generative-ui` | `generative-ui` | Interactive HTML-style widgets for rich output |
+| `@kaiserlich-dev/pi-session-search` | `session-search` | Indexed session recall with summarize and resume UI. Powers `/search` |
+| `@samfp/pi-memory` | `memory` | Automatic preference and correction memory across sessions |
+
+## Installing and managing packages
+
+List all available packages and their install status:
+
+```bash
+feynman packages list
+```
+
+Install a specific optional preset:
+
+```bash
+feynman packages install session-search
+feynman packages install memory
+feynman packages install generative-ui
+```
+
+Install all optional packages at once:
+
+```bash
+feynman packages install all-extras
+```
+
+## Updating packages
+
+Update all installed packages to their latest versions:
+
+```bash
+feynman update
+```
+
+Update a specific package:
+
+```bash
+feynman update pi-subagents
+```
+
+Running `feynman update` without arguments updates everything. Pass a specific package name to update just that one. Updates are safe and preserve your configuration.

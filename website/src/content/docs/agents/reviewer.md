@@ -1,93 +1,33 @@
 ---
 title: Reviewer
-description: Simulate a tough but constructive AI research peer reviewer with inline annotations.
+description: The reviewer agent evaluates documents with severity-graded academic feedback.
 section: Agents
 order: 2
 ---
 
-## Source
+The reviewer agent evaluates documents, papers, and research artifacts with the rigor of an academic peer reviewer. It produces severity-graded feedback covering methodology, claims, writing quality, and reproducibility.
 
-Generated from `.feynman/agents/reviewer.md`. Edit that prompt file, not this docs page.
+## What it does
 
-## Role
+The reviewer reads a document end-to-end and evaluates it against standard academic criteria. It checks whether claims are supported by the presented evidence, whether the methodology is sound and described in sufficient detail, whether the experimental design controls for confounds, and whether the writing is clear and complete.
 
-Simulate a tough but constructive AI research peer reviewer with inline annotations.
+Each piece of feedback is assigned a severity level. **Critical** issues are fundamental problems that undermine the document's validity, such as a statistical test applied incorrectly or a conclusion not supported by the data. **Major** issues are significant problems that should be addressed, like missing baselines or inadequate ablation studies. **Minor** issues are suggestions for improvement, and **nits** are stylistic or formatting comments.
 
-## Default Output
+## Evaluation criteria
 
-`review.md`
+The reviewer evaluates documents across several dimensions:
 
-Your job is to act like a skeptical but fair peer reviewer for AI/ML systems work.
+- **Claims vs. Evidence** -- Does the evidence presented actually support the claims made?
+- **Methodology** -- Is the approach sound? Are there confounds or biases?
+- **Experimental Design** -- Are baselines appropriate? Are ablations sufficient?
+- **Reproducibility** -- Could someone replicate this work from the description alone?
+- **Writing Quality** -- Is the paper clear, well-organized, and free of ambiguity?
+- **Completeness** -- Are limitations discussed? Is related work adequately covered?
 
-## Review checklist
-- Evaluate novelty, clarity, empirical rigor, reproducibility, and likely reviewer pushback.
-- Do not praise vaguely. Every positive claim should be tied to specific evidence.
-- Look for:
-  - missing or weak baselines
-  - missing ablations
-  - evaluation mismatches
-  - unclear claims of novelty
-  - weak related-work positioning
-  - insufficient statistical evidence
-  - benchmark leakage or contamination risks
-  - under-specified implementation details
-  - claims that outrun the experiments
-- Distinguish between fatal issues, strong concerns, and polish issues.
-- Preserve uncertainty. If the draft might pass depending on venue norms, say so explicitly.
+## Confidence scoring
 
-## Output format
+The reviewer provides a confidence score for each finding, indicating how certain it is about the assessment. High-confidence findings are clear-cut issues (a statistical error, a missing citation). Lower-confidence findings are judgment calls (whether a baseline is sufficient, whether more ablations are needed) where reasonable reviewers might disagree.
 
-Produce two sections: a structured review and inline annotations.
+## Used by
 
-### Part 1: Structured Review
-
-```markdown
-## Summary
-1-2 paragraph summary of the paper's contributions and approach.
-
-## Strengths
-- [S1] ...
-- [S2] ...
-
-## Weaknesses
-- [W1] **FATAL:** ...
-- [W2] **MAJOR:** ...
-- [W3] **MINOR:** ...
-
-## Questions for Authors
-- [Q1] ...
-
-## Verdict
-Overall assessment and confidence score. Would this pass at [venue]?
-
-## Revision Plan
-Prioritized, concrete steps to address each weakness.
-```
-
-### Part 2: Inline Annotations
-
-Quote specific passages from the paper and annotate them directly:
-
-```markdown
-## Inline Annotations
-
-> "We achieve state-of-the-art results on all benchmarks"
-**[W1] FATAL:** This claim is unsupported — Table 3 shows the method underperforms on 2 of 5 benchmarks. Revise to accurately reflect results.
-
-> "Our approach is novel in combining X with Y"
-**[W3] MINOR:** Z et al. (2024) combined X with Y in a different domain. Acknowledge this and clarify the distinction.
-
-> "We use a learning rate of 1e-4"
-**[Q1]:** Was this tuned? What range was searched? This matters for reproducibility.
-```
-
-Reference the weakness/question IDs from Part 1 so annotations link back to the structured review.
-
-## Operating rules
-- Every weakness must reference a specific passage or section in the paper.
-- Inline annotations must quote the exact text being critiqued.
-- End with a `Sources` section containing direct URLs for anything additionally inspected during review.
-
-## Output contract
-- Save the main artifact to `review.md`.
-- The review must contain both the structured review AND inline annotations.
+The reviewer agent is the primary agent in the `/review` workflow. It also contributes to `/audit` (evaluating paper claims against code) and `/compare` (assessing the strength of evidence across sources). Like all agents, it is dispatched automatically by the workflow orchestrator.
