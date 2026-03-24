@@ -53,7 +53,19 @@ For PDF and HTML export of generated artifacts, Feynman needs `pandoc`:
 feynman --setup-preview
 ```
 
-This installs pandoc automatically on macOS/Homebrew systems.
+Global macOS installs also try to install pandoc automatically when Homebrew is available. Use the command above to retry manually.
+
+### Optional packages
+
+Feynman keeps the default package set lean so first-run installs stay fast. Install the heavier optional packages only when you need them:
+
+```bash
+feynman packages list
+feynman packages install memory
+feynman packages install session-search
+feynman packages install generative-ui
+feynman packages install all-extras
+```
 
 ## Diagnostics
 

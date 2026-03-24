@@ -16,6 +16,7 @@ import { AuthStorage, DefaultPackageManager, ModelRegistry, SettingsManager } fr
 import { syncBundledAssets } from "./bootstrap/sync.js";
 import { ensureFeynmanHome, getDefaultSessionDir, getFeynmanAgentDir, getFeynmanHome } from "./config/paths.js";
 import { launchPiChat } from "./pi/launch.js";
+import { CORE_PACKAGE_SOURCES, getOptionalPackagePresetSources, listOptionalPackagePresets } from "./pi/package-presets.js";
 import { normalizeFeynmanSettings, normalizeThinkingLevel, parseModelSpec } from "./pi/settings.js";
 import {
 	loginModelProvider,
@@ -164,6 +165,72 @@ async function handleUpdateCommand(workingDir: string, feynmanAgentDir: string, 
 	await packageManager.update(source);
 	await settingsManager.flush();
 	console.log("All packages up to date.");
+}
+
+async function handlePackagesCommand(subcommand: string | undefined, args: string[], workingDir: string, feynmanAgentDir: string): Promise<void> {
+	const settingsManager = SettingsManager.create(workingDir, feynmanAgentDir);
+	const configuredSources = new Set(
+		settingsManager
+			.getPackages()
+			.map((entry) => (typeof entry === "string" ? entry : entry.source))
+			.filter((entry): entry is string => typeof entry === "string"),
+	);
+
+	if (!subcommand || subcommand === "list") {
+		printPanel("Feynman Packages", [
+			"Core packages are installed by default to keep first-run setup fast.",
+		]);
+		printSection("Core");
+		for (const source of CORE_PACKAGE_SOURCES) {
+			printInfo(source);
+		}
+		printSection("Optional");
+		for (const preset of listOptionalPackagePresets()) {
+			const installed = preset.sources.every((source) => configuredSources.has(source));
+			printInfo(`${preset.name}${installed ? " (installed)" : ""}  ${preset.description}`);
+		}
+		printInfo("Install with: feynman packages install <preset>");
+		return;
+	}
+
+	if (subcommand !== "install") {
+		throw new Error(`Unknown packages command: ${subcommand}`);
+	}
+
+	const target = args[0];
+	if (!target) {
+		throw new Error("Usage: feynman packages install <generative-ui|memory|session-search|all-extras>");
+	}
+
+	const sources = getOptionalPackagePresetSources(target);
+	if (!sources) {
+		throw new Error(`Unknown package preset: ${target}`);
+	}
+
+	const packageManager = new DefaultPackageManager({
+		cwd: workingDir,
+		agentDir: feynmanAgentDir,
+		settingsManager,
+	});
+	packageManager.setProgressCallback((event) => {
+		if (event.type === "start") {
+			console.log(`Installing ${event.source}...`);
+		} else if (event.type === "complete") {
+			console.log(`Installed ${event.source}`);
+		} else if (event.type === "error") {
+			console.error(`Failed to install ${event.source}: ${event.message ?? "unknown error"}`);
+		}
+	});
+
+	for (const source of sources) {
+		if (configuredSources.has(source)) {
+			console.log(`${source} already installed`);
+			continue;
+		}
+		await packageManager.install(source);
+	}
+	await settingsManager.flush();
+	console.log("Optional packages installed.");
 }
 
 function handleSearchCommand(subcommand: string | undefined): void {
@@ -330,6 +397,11 @@ export async function main(): Promise<void> {
 
 	if (command === "search") {
 		handleSearchCommand(rest[0]);
+		return;
+	}
+
+	if (command === "packages") {
+		await handlePackagesCommand(rest[0], rest.slice(1), workingDir, feynmanAgentDir);
 		return;
 	}
 

@@ -6,13 +6,10 @@
     "npm:pi-web-access",
     "npm:pi-markdown-preview",
     "npm:@walterra/pi-charts",
-    "npm:pi-generative-ui",
     "npm:pi-mermaid",
     "npm:@aliou/pi-processes",
     "npm:pi-zotero",
-    "npm:@kaiserlich-dev/pi-session-search",
     "npm:pi-schedule-prompt",
-    "npm:@samfp/pi-memory",
     "npm:@tmustier/pi-ralph-wiggum"
   ],
   "quietStartup": true,

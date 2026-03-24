@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const appRoot = resolve(here, "..");
+const isGlobalInstall = process.env.npm_config_global === "true" || process.env.npm_config_location === "global";
 
 function findNodeModules() {
 	let dir = appRoot;
@@ -53,7 +54,75 @@ const settingsPath = resolve(appRoot, ".feynman", "settings.json");
 const workspaceDir = resolve(appRoot, ".feynman", "npm");
 const workspacePackageJsonPath = resolve(workspaceDir, "package.json");
 
-// Pi handles package installation from .feynman/settings.json at runtime — no manual install needed
+function resolveExecutable(name, fallbackPaths = []) {
+	for (const candidate of fallbackPaths) {
+		if (existsSync(candidate)) return candidate;
+	}
+
+	const result = spawnSync("sh", ["-lc", `command -v ${name}`], {
+		encoding: "utf8",
+		stdio: ["ignore", "pipe", "ignore"],
+	});
+	if (result.status === 0) {
+		const resolved = result.stdout.trim();
+		if (resolved) return resolved;
+	}
+	return null;
+}
+
+function ensurePackageWorkspace() {
+	if (!existsSync(settingsPath)) return;
+
+	const settings = JSON.parse(readFileSync(settingsPath, "utf8"));
+	const packageSpecs = Array.isArray(settings.packages)
+		? settings.packages
+				.filter((v) => typeof v === "string" && v.startsWith("npm:"))
+				.map((v) => v.slice(4))
+		: [];
+
+	if (packageSpecs.length === 0) return;
+	if (existsSync(resolve(workspaceRoot, packageSpecs[0]))) return;
+
+	mkdirSync(workspaceDir, { recursive: true });
+	writeFileSync(
+		workspacePackageJsonPath,
+		JSON.stringify({ name: "feynman-packages", private: true }, null, 2) + "\n",
+		"utf8",
+	);
+
+	console.log("[feynman] installing research packages...");
+	const result = spawnSync("npm", ["install", "--prefer-offline", "--no-audit", "--no-fund", "--prefix", workspaceDir, ...packageSpecs], {
+		stdio: "inherit",
+		timeout: 300000,
+	});
+
+	if (result.status !== 0) {
+		console.warn("[feynman] warning: package install failed, Pi will retry on first launch");
+	}
+}
+
+ensurePackageWorkspace();
+
+function ensurePandoc() {
+	if (!isGlobalInstall) return;
+	if (process.platform !== "darwin") return;
+	if (process.env.FEYNMAN_SKIP_PANDOC_INSTALL === "1") return;
+	if (resolveExecutable("pandoc", ["/opt/homebrew/bin/pandoc", "/usr/local/bin/pandoc"])) return;
+
+	const brewPath = resolveExecutable("brew", ["/opt/homebrew/bin/brew", "/usr/local/bin/brew"]);
+	if (!brewPath) return;
+
+	console.log("[feynman] installing pandoc...");
+	const result = spawnSync(brewPath, ["install", "pandoc"], {
+		stdio: "inherit",
+		timeout: 300000,
+	});
+	if (result.status !== 0) {
+		console.warn("[feynman] warning: pandoc install failed, run `feynman --setup-preview` later");
+	}
+}
+
+ensurePandoc();
 
 if (existsSync(packageJsonPath)) {
 	const pkg = JSON.parse(readFileSync(packageJsonPath, "utf8"));

@@ -1,7 +1,9 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 
-import { AuthStorage, ModelRegistry } from "@mariozechner/pi-coding-agent";
+import { AuthStorage, ModelRegistry, type PackageSource } from "@mariozechner/pi-coding-agent";
+
+import { CORE_PACKAGE_SOURCES, shouldPruneLegacyDefaultPackages } from "./package-presets.js";
 
 export type ThinkingLevel = "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
 
@@ -107,6 +109,11 @@ export function normalizeFeynmanSettings(
 	settings.theme = "feynman";
 	settings.quietStartup = true;
 	settings.collapseChangelog = true;
+	if (!Array.isArray(settings.packages) || settings.packages.length === 0) {
+		settings.packages = [...CORE_PACKAGE_SOURCES];
+	} else if (shouldPruneLegacyDefaultPackages(settings.packages as PackageSource[])) {
+		settings.packages = [...CORE_PACKAGE_SOURCES];
+	}
 
 	const authStorage = AuthStorage.create(authPath);
 	const modelRegistry = new ModelRegistry(authStorage);

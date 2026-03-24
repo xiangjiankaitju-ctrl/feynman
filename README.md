@@ -61,7 +61,7 @@ Four bundled research agents, dispatched automatically or via subagent commands.
 - **Docker** — isolated container execution for safe experiments on your machine
 - **[Agent Computer](https://agentcomputer.ai)** — secure cloud execution for long-running research and GPU workloads
 - **Web search** — Gemini or Perplexity, zero-config default via signed-in Chromium
-- **Session search** — indexed recall across prior research sessions
+- **Session search** — optional indexed recall across prior research sessions
 - **Preview** — browser and PDF export of generated artifacts
 
 ---
@@ -76,6 +76,8 @@ feynman status                      # current config summary
 feynman model login [provider]      # model auth
 feynman model set <provider/model>  # set default model
 feynman alpha login                 # alphaXiv auth
+feynman packages list               # core vs optional packages
+feynman packages install memory     # opt into heavier packages on demand
 feynman search status               # web search config
 ```
 
