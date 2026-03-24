@@ -27,8 +27,8 @@ export function resolvePiPaths(appRoot: string) {
 		promisePolyfillPath: resolve(appRoot, "dist", "system", "promise-polyfill.js"),
 		researchToolsPath: resolve(appRoot, "extensions", "research-tools.ts"),
 		promptTemplatePath: resolve(appRoot, "prompts"),
-		systemPromptPath: resolve(appRoot, ".pi", "SYSTEM.md"),
-		piWorkspaceNodeModulesPath: resolve(appRoot, ".pi", "npm", "node_modules"),
+		systemPromptPath: resolve(appRoot, ".feynman", "SYSTEM.md"),
+		piWorkspaceNodeModulesPath: resolve(appRoot, ".feynman", "npm", "node_modules"),
 	};
 }
 

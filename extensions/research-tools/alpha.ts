@@ -15,11 +15,12 @@ import {
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 
+import { getExtensionCommandSpec } from "../../metadata/commands.mjs";
 import { formatToolText } from "./shared.js";
 
 export function registerAlphaCommands(pi: ExtensionAPI): void {
 	pi.registerCommand("alpha-login", {
-		description: "Sign in to alphaXiv from inside Feynman.",
+		description: getExtensionCommandSpec("alpha-login")?.description ?? "Sign in to alphaXiv from inside Feynman.",
 		handler: async (_args, ctx) => {
 			if (isAlphaLoggedIn()) {
 				const name = getAlphaUserName();
@@ -34,7 +35,7 @@ export function registerAlphaCommands(pi: ExtensionAPI): void {
 	});
 
 	pi.registerCommand("alpha-logout", {
-		description: "Clear alphaXiv auth from inside Feynman.",
+		description: getExtensionCommandSpec("alpha-logout")?.description ?? "Clear alphaXiv auth from inside Feynman.",
 		handler: async (_args, ctx) => {
 			logoutAlpha();
 			ctx.ui.notify("alphaXiv auth cleared", "info");
@@ -42,7 +43,7 @@ export function registerAlphaCommands(pi: ExtensionAPI): void {
 	});
 
 	pi.registerCommand("alpha-status", {
-		description: "Show alphaXiv authentication status.",
+		description: getExtensionCommandSpec("alpha-status")?.description ?? "Show alphaXiv authentication status.",
 		handler: async (_args, ctx) => {
 			if (!isAlphaLoggedIn()) {
 				ctx.ui.notify("alphaXiv not connected", "warning");

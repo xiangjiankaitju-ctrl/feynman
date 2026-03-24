@@ -1,5 +1,8 @@
 ---
 description: Autonomous experiment loop — try ideas, measure results, keep what works, discard what doesn't, repeat.
+args: <idea>
+section: Research Workflows
+topLevelCli: true
 ---
 Start an autoresearch optimization loop for: $@
 

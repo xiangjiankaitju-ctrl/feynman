@@ -21,7 +21,7 @@ test("loadPiWebAccessConfig returns empty config when Pi web config is missing",
 test("getPiWebAccessStatus reads Pi web-access config directly", () => {
 	const root = mkdtempSync(join(tmpdir(), "feynman-pi-web-"));
 	const configPath = getPiWebSearchConfigPath(root);
-	mkdirSync(join(root, ".pi"), { recursive: true });
+	mkdirSync(join(root, ".feynman"), { recursive: true });
 	writeFileSync(
 		configPath,
 		JSON.stringify({

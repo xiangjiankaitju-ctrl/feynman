@@ -24,7 +24,7 @@ export type PiWebAccessStatus = {
 };
 
 export function getPiWebSearchConfigPath(home = process.env.HOME ?? homedir()): string {
-	return resolve(home, ".pi", "web-search.json");
+	return resolve(home, ".feynman", "web-search.json");
 }
 
 function normalizeProvider(value: unknown): PiWebSearchProvider | undefined {

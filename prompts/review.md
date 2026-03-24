@@ -1,5 +1,8 @@
 ---
 description: Simulate an AI research peer review with likely objections, severity, and a concrete revision plan.
+args: <artifact>
+section: Research Workflows
+topLevelCli: true
 ---
 Review this AI research artifact: $@
 

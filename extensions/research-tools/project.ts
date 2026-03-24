@@ -4,13 +4,14 @@ import { dirname, resolve as resolvePath } from "node:path";
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 
+import { getExtensionCommandSpec } from "../../metadata/commands.mjs";
 import { renderHtmlPreview, renderPdfPreview, openWithDefaultApp, pathExists, buildProjectAgentsTemplate, buildSessionLogsReadme } from "./preview.js";
 import { formatToolText } from "./shared.js";
 import { searchSessionTranscripts } from "./session-search.js";
 
 export function registerInitCommand(pi: ExtensionAPI): void {
 	pi.registerCommand("init", {
-		description: "Initialize AGENTS.md and session-log folders for a research project.",
+		description: getExtensionCommandSpec("init")?.description ?? "Initialize AGENTS.md and session-log folders for a research project.",
 		handler: async (_args, ctx) => {
 			const agentsPath = resolvePath(ctx.cwd, "AGENTS.md");
 			const notesDir = resolvePath(ctx.cwd, "notes");

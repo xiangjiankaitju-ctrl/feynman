@@ -28,23 +28,27 @@ import { runDoctor, runStatus } from "./setup/doctor.js";
 import { setupPreviewDependencies } from "./setup/preview.js";
 import { runSetup } from "./setup/setup.js";
 import { printInfo, printPanel, printSection } from "./ui/terminal.js";
+import {
+	cliCommandSections,
+	formatCliWorkflowUsage,
+	legacyFlags,
+	readPromptSpecs,
+	topLevelCommandNames,
+} from "../metadata/commands.mjs";
 
-const TOP_LEVEL_COMMANDS = new Set(["alpha", "chat", "doctor", "help", "model", "search", "setup", "status", "update"]);
-const RESEARCH_WORKFLOW_COMMANDS = new Set([
-	"audit",
-	"autoresearch",
-	"compare",
-	"deepresearch",
-	"draft",
-	"jobs",
-	"lit",
-	"log",
-	"replicate",
-	"review",
-	"watch",
-]);
+const TOP_LEVEL_COMMANDS = new Set(topLevelCommandNames);
 
-function printHelp(): void {
+function printHelpLine(usage: string, description: string): void {
+	const width = 30;
+	const padding = Math.max(1, width - usage.length);
+	printInfo(`${usage}${" ".repeat(padding)}${description}`);
+}
+
+function printHelp(appRoot: string): void {
+	const workflowCommands = readPromptSpecs(appRoot).filter(
+		(command) => command.section === "Research Workflows" && command.topLevelCli,
+	);
+
 	printPanel("Feynman", [
 		"Research-first agent shell built on Pi.",
 		"Use `feynman setup` first if this is a new machine.",
@@ -58,39 +62,21 @@ function printHelp(): void {
 	printInfo("feynman search status");
 
 	printSection("Commands");
-	printInfo("feynman chat [prompt]       Start chat explicitly, optionally with an initial prompt");
-	printInfo("feynman setup               Run the guided setup");
-	printInfo("feynman doctor              Diagnose config, auth, Pi runtime, and preview deps");
-	printInfo("feynman status              Show the current setup summary");
-	printInfo("feynman model list          Show available models in auth storage");
-	printInfo("feynman model login [id]    Login to a Pi OAuth model provider");
-	printInfo("feynman model logout [id]   Logout from a Pi OAuth model provider");
-	printInfo("feynman model set <spec>    Set the default model");
-	printInfo("feynman update [package]    Update installed packages (or a specific one)");
-	printInfo("feynman search status       Show Pi web-access status and config path");
-	printInfo("feynman alpha login|logout|status");
+	for (const section of cliCommandSections) {
+		for (const command of section.commands) {
+			printHelpLine(command.usage, command.description);
+		}
+	}
 
 	printSection("Research Workflows");
-	printInfo("feynman deepresearch <topic>  Start a thorough source-heavy investigation");
-	printInfo("feynman lit <topic>           Start the literature-review workflow");
-	printInfo("feynman review <artifact>     Start the peer-review workflow");
-	printInfo("feynman audit <item>          Start the paper/code audit workflow");
-	printInfo("feynman replicate <target>    Start the replication workflow");
-	printInfo("feynman draft <topic>         Start the paper-style draft workflow");
-	printInfo("feynman compare <topic>       Start the source-comparison workflow");
-	printInfo("feynman watch <topic>         Start the recurring research watch workflow");
+	for (const command of workflowCommands) {
+		printHelpLine(formatCliWorkflowUsage(command), command.description);
+	}
 
 	printSection("Legacy Flags");
-	printInfo('--prompt "<text>"           Run one prompt and exit');
-	printInfo("--alpha-login               Sign in to alphaXiv and exit");
-	printInfo("--alpha-logout              Clear alphaXiv auth and exit");
-	printInfo("--alpha-status              Show alphaXiv auth status and exit");
-	printInfo("--model provider:model      Force a specific model");
-	printInfo("--thinking level            off | minimal | low | medium | high | xhigh");
-	printInfo("--cwd /path/to/workdir      Working directory for tools");
-	printInfo("--session-dir /path         Session storage directory");
-	printInfo("--doctor                    Alias for `feynman doctor`");
-	printInfo("--setup-preview             Alias for `feynman setup preview`");
+	for (const flag of legacyFlags) {
+		printHelpLine(flag.usage, flag.description);
+	}
 
 	printSection("REPL");
 	printInfo("Inside the REPL, slash workflows come from the live prompt-template and extension command set.");
@@ -201,6 +187,7 @@ export function resolveInitialPrompt(
 	command: string | undefined,
 	rest: string[],
 	oneShotPrompt: string | undefined,
+	workflowCommands: Set<string>,
 ): string | undefined {
 	if (oneShotPrompt) {
 		return oneShotPrompt;
@@ -211,7 +198,7 @@ export function resolveInitialPrompt(
 	if (command === "chat") {
 		return rest.length > 0 ? rest.join(" ") : undefined;
 	}
-	if (RESEARCH_WORKFLOW_COMMANDS.has(command)) {
+	if (workflowCommands.has(command)) {
 		return [`/${command}`, ...rest].join(" ").trim();
 	}
 	if (!TOP_LEVEL_COMMANDS.has(command)) {
@@ -224,7 +211,7 @@ export async function main(): Promise<void> {
 	const here = dirname(fileURLToPath(import.meta.url));
 	const appRoot = resolve(here, "..");
 	const feynmanVersion = loadPackageVersion(appRoot).version;
-	const bundledSettingsPath = resolve(appRoot, ".pi", "settings.json");
+	const bundledSettingsPath = resolve(appRoot, ".feynman", "settings.json");
 	const feynmanHome = getFeynmanHome();
 	const feynmanAgentDir = getFeynmanAgentDir(feynmanHome);
 
@@ -251,7 +238,7 @@ export async function main(): Promise<void> {
 	});
 
 	if (values.help) {
-		printHelp();
+		printHelp(appRoot);
 		return;
 	}
 
@@ -297,7 +284,7 @@ export async function main(): Promise<void> {
 
 	const [command, ...rest] = positionals;
 	if (command === "help") {
-		printHelp();
+		printHelp(appRoot);
 		return;
 	}
 
@@ -374,6 +361,6 @@ export async function main(): Promise<void> {
 		thinkingLevel,
 		explicitModelSpec,
 		oneShotPrompt: values.prompt,
-		initialPrompt: resolveInitialPrompt(command, rest, values.prompt),
+		initialPrompt: resolveInitialPrompt(command, rest, values.prompt, new Set(readPromptSpecs(appRoot).filter((s) => s.topLevelCli).map((s) => s.name))),
 	});
 }

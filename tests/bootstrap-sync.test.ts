@@ -8,10 +8,10 @@ import { syncBundledAssets } from "../src/bootstrap/sync.js";
 
 function createAppRoot(): string {
 	const appRoot = mkdtempSync(join(tmpdir(), "feynman-app-"));
-	mkdirSync(join(appRoot, ".pi", "themes"), { recursive: true });
-	mkdirSync(join(appRoot, ".pi", "agents"), { recursive: true });
-	writeFileSync(join(appRoot, ".pi", "themes", "feynman.json"), '{"theme":"v1"}\n', "utf8");
-	writeFileSync(join(appRoot, ".pi", "agents", "researcher.md"), "# v1\n", "utf8");
+	mkdirSync(join(appRoot, ".feynman", "themes"), { recursive: true });
+	mkdirSync(join(appRoot, ".feynman", "agents"), { recursive: true });
+	writeFileSync(join(appRoot, ".feynman", "themes", "feynman.json"), '{"theme":"v1"}\n', "utf8");
+	writeFileSync(join(appRoot, ".feynman", "agents", "researcher.md"), "# v1\n", "utf8");
 	return appRoot;
 }
 
@@ -38,8 +38,8 @@ test("syncBundledAssets preserves user-modified files and updates managed files"
 
 	syncBundledAssets(appRoot, agentDir);
 
-	writeFileSync(join(appRoot, ".pi", "themes", "feynman.json"), '{"theme":"v2"}\n', "utf8");
-	writeFileSync(join(appRoot, ".pi", "agents", "researcher.md"), "# v2\n", "utf8");
+	writeFileSync(join(appRoot, ".feynman", "themes", "feynman.json"), '{"theme":"v2"}\n', "utf8");
+	writeFileSync(join(appRoot, ".feynman", "agents", "researcher.md"), "# v2\n", "utf8");
 	writeFileSync(join(agentDir, "agents", "researcher.md"), "# user-custom\n", "utf8");
 
 	const result = syncBundledAssets(appRoot, agentDir);

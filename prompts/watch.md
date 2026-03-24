@@ -1,5 +1,8 @@
 ---
 description: Set up a recurring or deferred research watch on a topic, company, paper area, or product surface.
+args: <topic>
+section: Research Workflows
+topLevelCli: true
 ---
 Create a research watch for: $@
 

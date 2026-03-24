@@ -58,10 +58,11 @@ test("buildModelStatusSnapshotFromRecords flags an invalid current model and sug
 });
 
 test("resolveInitialPrompt maps top-level research commands to Pi slash workflows", () => {
-	assert.equal(resolveInitialPrompt("lit", ["tool-using", "agents"], undefined), "/lit tool-using agents");
-	assert.equal(resolveInitialPrompt("watch", ["openai"], undefined), "/watch openai");
-	assert.equal(resolveInitialPrompt("jobs", [], undefined), "/jobs");
-	assert.equal(resolveInitialPrompt("chat", ["hello"], undefined), "hello");
-	assert.equal(resolveInitialPrompt("unknown", ["topic"], undefined), "unknown topic");
+	const workflows = new Set(["lit", "watch", "jobs", "deepresearch"]);
+	assert.equal(resolveInitialPrompt("lit", ["tool-using", "agents"], undefined, workflows), "/lit tool-using agents");
+	assert.equal(resolveInitialPrompt("watch", ["openai"], undefined, workflows), "/watch openai");
+	assert.equal(resolveInitialPrompt("jobs", [], undefined, workflows), "/jobs");
+	assert.equal(resolveInitialPrompt("chat", ["hello"], undefined, workflows), "hello");
+	assert.equal(resolveInitialPrompt("unknown", ["topic"], undefined, workflows), "unknown topic");
 });
 

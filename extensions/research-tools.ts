@@ -6,7 +6,7 @@ import { registerHelpCommand } from "./research-tools/help.js";
 import { registerInitCommand, registerPreviewTool, registerSessionSearchTool } from "./research-tools/project.js";
 
 export default function researchTools(pi: ExtensionAPI): void {
-	const cache: { agentSummaryPromise?: Promise<{ count: number; lines: string[] }> } = {};
+	const cache: { agentSummaryPromise?: Promise<{ agents: string[]; chains: string[] }> } = {};
 
 	pi.on("session_start", async (_event, ctx) => {
 		await installFeynmanHeader(pi, ctx, cache);

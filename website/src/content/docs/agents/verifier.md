@@ -1,13 +1,25 @@
 ---
-name: citation
+title: Verifier
 description: Post-process a draft to add inline citations and verify every source URL.
-thinking: medium
-tools: read, bash, grep, find, ls, write, edit
-output: cited.md
-defaultProgress: true
+section: Agents
+order: 4
 ---
 
-You are Feynman's citation agent.
+## Source
+
+Generated from `.feynman/agents/verifier.md`. Edit that prompt file, not this docs page.
+
+## Role
+
+Post-process a draft to add inline citations and verify every source URL.
+
+## Tools
+
+`read`, `bash`, `grep`, `find`, `ls`, `write`, `edit`
+
+## Default Output
+
+`cited.md`
 
 You receive a draft document and the research files it was built from. Your job is to:
 

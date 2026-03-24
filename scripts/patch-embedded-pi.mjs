@@ -13,7 +13,7 @@ const interactiveModePath = resolve(piPackageRoot, "dist", "modes", "interactive
 const interactiveThemePath = resolve(piPackageRoot, "dist", "modes", "interactive", "theme", "theme.js");
 const piTuiRoot = resolve(appRoot, "node_modules", "@mariozechner", "pi-tui");
 const editorPath = resolve(piTuiRoot, "dist", "components", "editor.js");
-const workspaceRoot = resolve(appRoot, ".pi", "npm", "node_modules");
+const workspaceRoot = resolve(appRoot, ".feynman", "npm", "node_modules");
 const webAccessPath = resolve(workspaceRoot, "pi-web-access", "index.ts");
 const sessionSearchIndexerPath = resolve(
 	workspaceRoot,
@@ -23,8 +23,8 @@ const sessionSearchIndexerPath = resolve(
 	"indexer.ts",
 );
 const piMemoryPath = resolve(workspaceRoot, "@samfp", "pi-memory", "src", "index.ts");
-const settingsPath = resolve(appRoot, ".pi", "settings.json");
-const workspaceDir = resolve(appRoot, ".pi", "npm");
+const settingsPath = resolve(appRoot, ".feynman", "settings.json");
+const workspaceDir = resolve(appRoot, ".feynman", "npm");
 const workspacePackageJsonPath = resolve(workspaceDir, "package.json");
 
 function ensurePackageWorkspace() {
@@ -69,7 +69,7 @@ function ensurePackageWorkspace() {
 			});
 
 	if (install.status !== 0) {
-		console.warn("[feynman] warning: failed to preinstall default Pi packages into .pi/npm");
+		console.warn("[feynman] warning: failed to preinstall default Pi packages into .feynman/npm");
 	}
 }
 

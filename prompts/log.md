@@ -1,5 +1,7 @@
 ---
 description: Write a durable session log with completed work, findings, open questions, and next steps.
+section: Project & Session
+topLevelCli: true
 ---
 Write a session log for the current research work.
 

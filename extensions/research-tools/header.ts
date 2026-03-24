@@ -106,7 +106,7 @@ async function buildAgentCatalogSummary(): Promise<{ agents: string[]; chains: s
 	const agents: string[] = [];
 	const chains: string[] = [];
 	try {
-		const entries = await readdir(resolvePath(APP_ROOT, ".pi", "agents"), { withFileTypes: true });
+		const entries = await readdir(resolvePath(APP_ROOT, ".feynman", "agents"), { withFileTypes: true });
 		for (const entry of entries) {
 			if (!entry.isFile() || !entry.name.endsWith(".md")) continue;
 			if (entry.name.endsWith(".chain.md")) {
@@ -243,9 +243,13 @@ export function installFeynmanHeader(
 					pushList("Chains", agentData.chains);
 
 					if (activity) {
+						const maxActivityLen = leftW * 2;
+						const trimmed = activity.length > maxActivityLen
+							? `${activity.slice(0, maxActivityLen - 1)}…`
+							: activity;
 						leftLines.push("");
 						leftLines.push(theme.fg("accent", theme.bold("Last Activity")));
-						for (const line of wrapWords(activity, leftW)) {
+						for (const line of wrapWords(trimmed, leftW)) {
 							leftLines.push(theme.fg("dim", line));
 						}
 					}

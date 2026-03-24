@@ -1,59 +1,82 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import {
+	extensionCommandSpecs,
+	formatSlashUsage,
+	getExtensionCommandSpec,
+	livePackageCommandGroups,
+	readPromptSpecs,
+} from "../../metadata/commands.mjs";
+import { APP_ROOT } from "./shared.js";
 
 type HelpCommand = { usage: string; description: string };
 type HelpSection = { title: string; commands: HelpCommand[] };
 
-function buildHelpSections(): HelpSection[] {
+function buildHelpSections(pi: ExtensionAPI): HelpSection[] {
+	const liveCommands = new Map(pi.getCommands().map((command) => [command.name, command]));
+	const promptSpecs = readPromptSpecs(APP_ROOT);
+	const sections = new Map<string, HelpCommand[]>();
+
+	for (const command of promptSpecs.filter((entry) => entry.section !== "Internal")) {
+		const live = liveCommands.get(command.name);
+		if (!live) continue;
+		const items = sections.get(command.section) ?? [];
+		items.push({
+			usage: formatSlashUsage(command),
+			description: live.description ?? command.description,
+		});
+		sections.set(command.section, items);
+	}
+
+	for (const command of extensionCommandSpecs.filter((entry) => entry.publicDocs)) {
+		const live = liveCommands.get(command.name);
+		if (!live) continue;
+		const items = sections.get(command.section) ?? [];
+		items.push({
+			usage: formatSlashUsage(command),
+			description: live.description ?? command.description,
+		});
+		sections.set(command.section, items);
+	}
+
+	const ownedNames = new Set([
+		...promptSpecs.filter((entry) => entry.section !== "Internal").map((entry) => entry.name),
+		...extensionCommandSpecs.filter((entry) => entry.publicDocs).map((entry) => entry.name),
+	]);
+
+	for (const group of livePackageCommandGroups) {
+		const commands: HelpCommand[] = [];
+		for (const spec of group.commands) {
+			const command = liveCommands.get(spec.name);
+			if (!command || ownedNames.has(command.name)) continue;
+			commands.push({
+				usage: spec.usage,
+				description: command.description ?? "",
+			});
+		}
+
+		if (commands.length > 0) {
+			sections.set(group.title, commands);
+		}
+	}
+
 	return [
-		{
-			title: "Research Workflows",
-			commands: [
-				{ usage: "/deepresearch <topic>", description: "Source-heavy investigation with parallel researchers." },
-				{ usage: "/lit <topic>", description: "Literature review using paper search." },
-				{ usage: "/review <artifact>", description: "Simulated peer review with objections and revision plan." },
-				{ usage: "/audit <item>", description: "Audit a paper against its public codebase." },
-				{ usage: "/replicate <paper>", description: "Replication workflow for a paper or claim." },
-				{ usage: "/draft <topic>", description: "Paper-style draft from research findings." },
-				{ usage: "/compare <topic>", description: "Compare sources with agreements and disagreements." },
-				{ usage: "/autoresearch <target>", description: "Autonomous experiment optimization loop." },
-				{ usage: "/watch <topic>", description: "Recurring research watch on a topic." },
-			],
-		},
-		{
-			title: "Agents & Delegation",
-			commands: [
-				{ usage: "/agents", description: "Open the agent and chain manager." },
-				{ usage: "/run <agent> <task>", description: "Run a single subagent." },
-				{ usage: "/chain agent1 -> agent2", description: "Run agents in sequence." },
-				{ usage: "/parallel agent1 -> agent2", description: "Run agents in parallel." },
-			],
-		},
-		{
-			title: "Project & Session",
-			commands: [
-				{ usage: "/init", description: "Bootstrap AGENTS.md and session-log folders." },
-				{ usage: "/log", description: "Write a session log to notes/." },
-				{ usage: "/jobs", description: "Inspect active background work." },
-				{ usage: "/search", description: "Search prior sessions." },
-				{ usage: "/preview", description: "Preview a generated artifact." },
-			],
-		},
-		{
-			title: "Setup",
-			commands: [
-				{ usage: "/alpha-login", description: "Sign in to alphaXiv." },
-				{ usage: "/alpha-status", description: "Check alphaXiv auth." },
-				{ usage: "/alpha-logout", description: "Clear alphaXiv auth." },
-			],
-		},
-	];
+		"Research Workflows",
+		"Project & Session",
+		"Setup",
+		"Agents & Delegation",
+		"Bundled Package Commands",
+	]
+		.map((title) => ({ title, commands: sections.get(title) ?? [] }))
+		.filter((section) => section.commands.length > 0);
 }
 
 export function registerHelpCommand(pi: ExtensionAPI): void {
 	pi.registerCommand("help", {
-		description: "Show grouped Feynman commands and prefill the editor with a selected command.",
+		description:
+			getExtensionCommandSpec("help")?.description ??
+			"Show grouped Feynman commands and prefill the editor with a selected command.",
 		handler: async (_args, ctx) => {
-			const sections = buildHelpSections();
+			const sections = buildHelpSections(pi);
 			const items = sections.flatMap((section) => [
 				`--- ${section.title} ---`,
 				...section.commands.map((cmd) => `${cmd.usage} — ${cmd.description}`),

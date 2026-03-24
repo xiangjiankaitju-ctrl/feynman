@@ -1,161 +1,99 @@
 # Feynman
 
-`feynman` is a research-first CLI built on `@mariozechner/pi-coding-agent`.
-
-It keeps the useful parts of a coding agent:
-- file access
-- shell execution
-- persistent sessions
-- custom extensions
-
-But it biases the runtime toward general research work:
-- literature review
-- source discovery and paper lookup
-- source comparison
-- research memo writing
-- paper and report drafting
-- session recall and durable research memory
-- recurring and deferred research jobs
-- replication planning when relevant
-
-The primary paper backend is `@companion-ai/alpha-hub` and your alphaXiv account.
-The rest of the workflow is augmented through a curated `.pi/settings.json` package stack.
-
-## Install
+The open source AI research agent
 
 ```bash
 npm install -g @companion-ai/feynman
 ```
-
-Then authenticate alphaXiv and start the CLI:
 
 ```bash
 feynman setup
 feynman
 ```
 
-For local development:
+---
+
+## What you type → what happens
+
+| Prompt | Result |
+| --- | --- |
+| `feynman "what do we know about scaling laws"` | Searches papers and web, produces a cited research brief |
+| `feynman deepresearch "mechanistic interpretability"` | Multi-agent investigation with parallel researchers, synthesis, verification |
+| `feynman lit "RLHF alternatives"` | Literature review with consensus, disagreements, open questions |
+| `feynman audit 2401.12345` | Compares paper claims against the public codebase |
+| `feynman replicate "chain-of-thought improves math"` | Asks where to run, then builds a replication plan |
+| `feynman "summarize this PDF" --prompt paper.pdf` | One-shot mode, no REPL |
+
+---
+
+## Workflows
+
+Ask naturally or use slash commands as shortcuts.
+
+| Command | What it does |
+| --- | --- |
+| `/deepresearch <topic>` | Source-heavy multi-agent investigation |
+| `/lit <topic>` | Literature review from paper search and primary sources |
+| `/review <artifact>` | Simulated peer review with severity and revision plan |
+| `/audit <item>` | Paper vs. codebase mismatch audit |
+| `/replicate <paper>` | Replication plan with environment selection |
+| `/compare <topic>` | Source comparison matrix |
+| `/draft <topic>` | Paper-style draft from research findings |
+| `/autoresearch <idea>` | Autonomous experiment loop |
+| `/watch <topic>` | Recurring research watch |
+
+---
+
+## Agents
+
+Four bundled research agents, dispatched automatically or via subagent commands.
+
+- **Researcher** — gather evidence across papers, web, repos, docs
+- **Reviewer** — simulated peer review with severity-graded feedback
+- **Writer** — structured drafts from research notes
+- **Verifier** — inline citations, source URL verification, dead link cleanup
+
+---
+
+## Tools
+
+- **[AlphaXiv](https://www.alphaxiv.org/)** — paper search, Q&A, code reading, persistent annotations
+- **Web search** — Gemini or Perplexity, zero-config default via signed-in Chromium
+- **Session search** — indexed recall across prior research sessions
+- **Preview** — browser and PDF export of generated artifacts
+
+---
+
+## CLI
 
 ```bash
-cd /Users/advaitpaliwal/Companion/Code/feynman
-npm install
-cp .env.example .env
-npm run start
+feynman                             # REPL
+feynman setup                       # guided setup
+feynman doctor                      # diagnose everything
+feynman status                      # current config summary
+feynman model login [provider]      # model auth
+feynman model set <provider/model>  # set default model
+feynman alpha login                 # alphaXiv auth
+feynman search status               # web search config
 ```
 
-Feynman uses Pi under the hood, but the user-facing entrypoint is `feynman`, not `pi`.
-When you run `feynman`, it launches the real Pi interactive TUI with Feynman's research extensions, prompt templates, package stack, memory snapshot, and branded defaults preloaded.
+---
 
-Most users should not need slash commands. The intended default is:
-- ask naturally
-- let Feynman route into the right workflow
-- use slash commands only as explicit shortcuts or overrides
+## How it works
 
-## Commands
+Built on [Pi](https://github.com/mariozechner/pi-coding-agent) and [Alpha Hub](https://github.com/getcompanion-ai/alpha-hub). Pi provides the agent runtime — file access, shell execution, persistent sessions, custom extensions. Alpha Hub connects to [alphaXiv](https://www.alphaxiv.org/) for paper search, Q&A, code reading, and annotations.
 
-Inside the REPL:
+Every output is source-grounded. Claims link to papers, docs, or repos with direct URLs.
 
-- `/help` shows local commands
-- `/init` bootstraps `AGENTS.md` and `notes/session-logs/`
-- `/alpha-login` signs in to alphaXiv
-- `/alpha-status` checks alphaXiv auth
-- `/new` starts a new persisted session
-- `/exit` quits
-- `/deepresearch <topic>` runs a thorough source-heavy investigation workflow
-- `/lit <topic>` expands the literature-review prompt template
-- `/review <artifact>` simulates a peer review for an AI research artifact
-- `/audit <item>` expands the paper/code audit prompt template
-- `/replicate <paper or claim>` expands the replication prompt template
-- `/draft <topic>` expands the paper-style writing prompt template
-- `/compare <topic>` expands the source comparison prompt template
-- `/autoresearch <idea>` expands the autonomous experiment loop
-- `/watch <topic>` schedules or prepares a recurring research watch
-- `/log` writes a durable session log to `notes/`
-- `/jobs` inspects active background work
+---
 
-Package-powered workflows inside the REPL:
+## Contributing
 
-- `/agents` opens the subagent and chain manager
-- `/run` and `/parallel` delegate work to subagents when you want explicit decomposition
-- `/ps` opens the background process panel
-- `/schedule-prompt` manages recurring and deferred jobs
-- `/search` opens indexed session search
-- `/preview` previews generated artifacts in the terminal, browser, or PDF
-
-Outside the REPL:
-
-- `feynman setup` runs the guided setup for model auth, alpha login, Pi web access, and preview deps
-- `feynman model login <provider>` logs into a Pi OAuth model provider from the outer Feynman CLI
-- `feynman --alpha-login` signs in to alphaXiv
-- `feynman --alpha-status` checks alphaXiv auth
-- `feynman --doctor` checks models, auth, preview dependencies, and branded settings
-- `feynman --setup-preview` installs `pandoc` automatically on macOS/Homebrew systems when preview support is missing
-
-## Web Search Routing
-
-Feynman v1 keeps web access simple: it uses the bundled `pi-web-access` package directly instead of maintaining a second Feynman-owned provider layer.
-
-The Pi web stack underneath supports three runtime routes:
-
-- `auto` — prefer Perplexity when configured, otherwise fall back to Gemini
-- `perplexity` — force Perplexity Sonar
-- `gemini` — force Gemini
-
-By default, the expected path is zero-config Gemini Browser via a signed-in Chromium profile. Advanced users can edit `~/.pi/web-search.json` directly if they want Gemini API keys, Perplexity keys, or a different route.
-
-Useful commands:
-
-- `feynman search status` — show the active Pi web-access route and config path
-
-## Custom Tools
-
-The starter extension adds:
-
-- `alpha_search` for alphaXiv-backed paper discovery
-- `alpha_get_paper` for fetching paper reports or raw text
-- `alpha_ask_paper` for targeted paper Q&A
-- `alpha_annotate_paper` for persistent local notes
-- `alpha_list_annotations` for recall across sessions
-- `alpha_read_code` for reading a paper repository
-- `session_search` for recovering prior Feynman work from stored transcripts
-- `preview_file` for browser/PDF review of generated artifacts
-
-Feynman also ships bundled research subagents in `.pi/agents/`:
-
-- `researcher` for evidence gathering
-- `reviewer` for peer-review style criticism
-- `writer` for polished memo and draft writing
-- `citation` for inline citations and source verification
-
-Feynman uses `@companion-ai/alpha-hub` directly in-process rather than shelling out to the CLI.
-
-## Curated Pi Stack
-
-Feynman loads a lean research stack from [.pi/settings.json](/Users/advaitpaliwal/Companion/Code/feynman/.pi/settings.json):
-
-- `pi-subagents` for parallel literature gathering and decomposition
-- `pi-btw` for fast side-thread /btw conversations without interrupting the main run
-- `pi-docparser` for PDFs, Office docs, spreadsheets, and images
-- `pi-web-access` for broader web, GitHub, PDF, and media access
-- `pi-markdown-preview` for polished Markdown and LaTeX-heavy research writeups
-- `@walterra/pi-charts` for charts and quantitative visualizations
-- `pi-generative-ui` for interactive HTML-style widgets
-- `pi-mermaid` for diagrams in the TUI
-- `@aliou/pi-processes` for long-running experiments and log tails
-- `pi-zotero` for citation-library workflows
-- `@kaiserlich-dev/pi-session-search` for indexed session recall and summarize/resume UI
-- `pi-schedule-prompt` for recurring and deferred research jobs
-- `@samfp/pi-memory` for automatic preference/correction memory across sessions
-
-The default expectation is source-grounded outputs with explicit `Sources` sections containing direct URLs and durable artifacts written to `outputs/`, `notes/`, `experiments/`, or `papers/`.
-
-## Layout
-
-```text
-feynman/
-├── .pi/agents/   # Bundled research subagents and chains
-├── extensions/   # Custom research tools
-├── papers/       # Polished paper-style drafts and writeups
-├── prompts/      # Slash-style prompt templates
-└── src/          # Branded launcher around the embedded Pi TUI
+```bash
+git clone https://github.com/getcompanion-ai/feynman.git
+cd feynman && npm install && npm run start
 ```
+
+[Docs](https://feynman.companion.ai/docs) · [MIT License](LICENSE)
+
+Built on [Pi](https://github.com/mariozechner/pi-coding-agent) and [Alpha Hub](https://github.com/getcompanion-ai/alpha-hub).

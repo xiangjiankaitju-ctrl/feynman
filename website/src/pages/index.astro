@@ -1,0 +1,155 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Feynman — The open source AI research agent" active="home">
+  <section class="text-center pt-24 pb-20 px-6">
+    <div class="max-w-2xl mx-auto">
+      <h1 class="text-5xl sm:text-6xl font-bold tracking-tight mb-6" style="text-wrap: balance">The open source AI research agent</h1>
+      <p class="text-lg text-text-muted mb-10 leading-relaxed" style="text-wrap: pretty">Investigate topics, write papers, run experiments, review research, audit codebases &mdash; every output cited and source-grounded</p>
+      <div class="inline-flex items-center gap-3 bg-surface rounded-lg px-5 py-3 mb-8 font-mono text-sm">
+        <code class="text-accent">npm install -g @companion-ai/feynman</code>
+        <button id="copy-btn" class="text-text-dim hover:text-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded" aria-label="Copy install command">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
+        </button>
+      </div>
+      <div class="flex gap-4 justify-center flex-wrap">
+        <a href="/docs/getting-started/installation" class="px-6 py-2.5 rounded-lg bg-accent text-bg font-semibold text-sm hover:bg-accent-hover transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg">Get started</a>
+        <a href="https://github.com/getcompanion-ai/feynman" target="_blank" rel="noopener" class="px-6 py-2.5 rounded-lg border border-border text-text-muted font-semibold text-sm hover:border-text-dim hover:text-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg">GitHub</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-20 px-6">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="text-2xl font-bold text-center mb-12">What you type &rarr; what happens</h2>
+      <div class="bg-surface rounded-xl p-6 font-mono text-sm leading-loose max-w-2xl mx-auto">
+        <div class="flex gap-4"><span class="text-text-dim shrink-0">$</span><span><span class="text-accent">feynman</span> "what do we know about scaling laws"</span></div>
+        <div class="text-text-dim mt-1 ml-6 text-xs">Searches papers and web, produces a cited research brief</div>
+        <div class="mt-4 flex gap-4"><span class="text-text-dim shrink-0">$</span><span><span class="text-accent">feynman</span> deepresearch "mechanistic interpretability"</span></div>
+        <div class="text-text-dim mt-1 ml-6 text-xs">Multi-agent investigation with parallel researchers, synthesis, verification</div>
+        <div class="mt-4 flex gap-4"><span class="text-text-dim shrink-0">$</span><span><span class="text-accent">feynman</span> lit "RLHF alternatives"</span></div>
+        <div class="text-text-dim mt-1 ml-6 text-xs">Literature review with consensus, disagreements, open questions</div>
+        <div class="mt-4 flex gap-4"><span class="text-text-dim shrink-0">$</span><span><span class="text-accent">feynman</span> audit 2401.12345</span></div>
+        <div class="text-text-dim mt-1 ml-6 text-xs">Compares paper claims against the public codebase</div>
+        <div class="mt-4 flex gap-4"><span class="text-text-dim shrink-0">$</span><span><span class="text-accent">feynman</span> replicate "chain-of-thought improves math"</span></div>
+        <div class="text-text-dim mt-1 ml-6 text-xs">Asks where to run, then builds a replication plan</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-20 px-6">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="text-2xl font-bold text-center mb-12">Workflows</h2>
+      <p class="text-center text-text-muted mb-10">Ask naturally or use slash commands as shortcuts.</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
+        <div class="bg-surface rounded-xl p-5">
+          <div class="font-mono text-sm text-accent mb-2">/deepresearch</div>
+          <p class="text-sm text-text-muted">Source-heavy multi-agent investigation</p>
+        </div>
+        <div class="bg-surface rounded-xl p-5">
+          <div class="font-mono text-sm text-accent mb-2">/lit</div>
+          <p class="text-sm text-text-muted">Literature review from paper search and primary sources</p>
+        </div>
+        <div class="bg-surface rounded-xl p-5">
+          <div class="font-mono text-sm text-accent mb-2">/review</div>
+          <p class="text-sm text-text-muted">Simulated peer review with severity and revision plan</p>
+        </div>
+        <div class="bg-surface rounded-xl p-5">
+          <div class="font-mono text-sm text-accent mb-2">/audit</div>
+          <p class="text-sm text-text-muted">Paper vs. codebase mismatch audit</p>
+        </div>
+        <div class="bg-surface rounded-xl p-5">
+          <div class="font-mono text-sm text-accent mb-2">/replicate</div>
+          <p class="text-sm text-text-muted">Replication plan with environment selection</p>
+        </div>
+        <div class="bg-surface rounded-xl p-5">
+          <div class="font-mono text-sm text-accent mb-2">/compare</div>
+          <p class="text-sm text-text-muted">Source comparison matrix</p>
+        </div>
+        <div class="bg-surface rounded-xl p-5">
+          <div class="font-mono text-sm text-accent mb-2">/draft</div>
+          <p class="text-sm text-text-muted">Paper-style draft from research findings</p>
+        </div>
+        <div class="bg-surface rounded-xl p-5">
+          <div class="font-mono text-sm text-accent mb-2">/autoresearch</div>
+          <p class="text-sm text-text-muted">Autonomous experiment loop</p>
+        </div>
+        <div class="bg-surface rounded-xl p-5">
+          <div class="font-mono text-sm text-accent mb-2">/watch</div>
+          <p class="text-sm text-text-muted">Recurring research watch</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-20 px-6">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="text-2xl font-bold text-center mb-12">Agents</h2>
+      <p class="text-center text-text-muted mb-10">Four bundled research agents, dispatched automatically.</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-surface rounded-xl p-6 text-center">
+          <div class="font-semibold text-accent mb-2">Researcher</div>
+          <p class="text-sm text-text-muted">Gathers evidence across papers, web, repos, and docs</p>
+        </div>
+        <div class="bg-surface rounded-xl p-6 text-center">
+          <div class="font-semibold text-accent mb-2">Reviewer</div>
+          <p class="text-sm text-text-muted">Simulated peer review with severity-graded feedback</p>
+        </div>
+        <div class="bg-surface rounded-xl p-6 text-center">
+          <div class="font-semibold text-accent mb-2">Writer</div>
+          <p class="text-sm text-text-muted">Structured briefs and drafts from research notes</p>
+        </div>
+        <div class="bg-surface rounded-xl p-6 text-center">
+          <div class="font-semibold text-accent mb-2">Verifier</div>
+          <p class="text-sm text-text-muted">Inline citations and source URL verification</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-20 px-6">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="text-2xl font-bold text-center mb-12">Tools</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+        <div class="bg-surface rounded-xl p-5">
+          <div class="font-semibold mb-1">AlphaXiv</div>
+          <p class="text-sm text-text-muted">Paper search, Q&A, code reading, persistent annotations</p>
+        </div>
+        <div class="bg-surface rounded-xl p-5">
+          <div class="font-semibold mb-1">Web search</div>
+          <p class="text-sm text-text-muted">Gemini or Perplexity, zero-config default</p>
+        </div>
+        <div class="bg-surface rounded-xl p-5">
+          <div class="font-semibold mb-1">Session search</div>
+          <p class="text-sm text-text-muted">Indexed recall across prior research sessions</p>
+        </div>
+        <div class="bg-surface rounded-xl p-5">
+          <div class="font-semibold mb-1">Preview</div>
+          <p class="text-sm text-text-muted">Browser and PDF export of generated artifacts</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-20 px-6 text-center">
+    <div class="max-w-xl mx-auto">
+      <p class="text-text-muted mb-6">Built on <a href="https://github.com/mariozechner/pi-coding-agent" class="text-accent hover:underline">Pi</a> and <a href="https://github.com/getcompanion-ai/alpha-hub" class="text-accent hover:underline">Alpha Hub</a>. MIT licensed. Open source.</p>
+      <div class="flex gap-4 justify-center flex-wrap">
+        <a href="/docs/getting-started/installation" class="px-6 py-2.5 rounded-lg bg-accent text-bg font-semibold text-sm hover:bg-accent-hover transition-colors">Get started</a>
+        <a href="https://github.com/getcompanion-ai/feynman" target="_blank" rel="noopener" class="px-6 py-2.5 rounded-lg border border-border text-text-muted font-semibold text-sm hover:border-text-dim hover:text-text-primary transition-colors">GitHub</a>
+      </div>
+    </div>
+  </section>
+
+  <script is:inline>
+    document.getElementById('copy-btn').addEventListener('click', function() {
+      navigator.clipboard.writeText('npm install -g @companion-ai/feynman');
+      this.innerHTML = '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+      var btn = this;
+      setTimeout(function() {
+        btn.innerHTML = '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+      }, 2000);
+    });
+  </script>
+</Base>

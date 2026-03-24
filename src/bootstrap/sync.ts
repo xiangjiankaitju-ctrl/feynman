@@ -128,8 +128,8 @@ export function syncBundledAssets(appRoot: string, agentDir: string): BootstrapS
 		skipped: [],
 	};
 
-	syncManagedFiles(resolve(appRoot, ".pi", "themes"), resolve(agentDir, "themes"), state, result);
-	syncManagedFiles(resolve(appRoot, ".pi", "agents"), resolve(agentDir, "agents"), state, result);
+	syncManagedFiles(resolve(appRoot, ".feynman", "themes"), resolve(agentDir, "themes"), state, result);
+	syncManagedFiles(resolve(appRoot, ".feynman", "agents"), resolve(agentDir, "agents"), state, result);
 
 	writeBootstrapState(statePath, state);
 	return result;

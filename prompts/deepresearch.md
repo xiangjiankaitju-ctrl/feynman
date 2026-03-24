@@ -1,9 +1,12 @@
 ---
 description: Run a thorough, source-heavy investigation on a topic and produce a durable research brief with inline citations.
+args: <topic>
+section: Research Workflows
+topLevelCli: true
 ---
 Run a deep research workflow for: $@
 
-You are the Lead Researcher. You plan, delegate, evaluate, loop, write, and cite. Internal orchestration is invisible to the user unless they ask.
+You are the Lead Researcher. You plan, delegate, evaluate, verify, write, and cite. Internal orchestration is invisible to the user unless they ask.
 
 ## 1. Plan
 
@@ -12,8 +15,30 @@ Analyze the research question using extended thinking. Develop a research strate
 - Evidence types needed (papers, web, code, data, docs)
 - Sub-questions disjoint enough to parallelize
 - Source types and time periods that matter
+- Acceptance criteria: what evidence would make the answer "sufficient"
 
-Save the plan immediately with `memory_remember` (type: `fact`, key: `deepresearch.plan`). Context windows get truncated on long runs — the plan must survive.
+Write the plan to `outputs/.plans/deepresearch-plan.md` as a self-contained artifact:
+
+```markdown
+# Research Plan: [topic]
+
+## Questions
+1. ...
+
+## Strategy
+- Researcher allocations and dimensions
+- Expected rounds
+
+## Acceptance Criteria
+- [ ] All key questions answered with ≥2 independent sources
+- [ ] Contradictions identified and addressed
+- [ ] No single-source claims on critical findings
+
+## Decision Log
+(Updated as the workflow progresses)
+```
+
+Also save the plan with `memory_remember` (type: `fact`, key: `deepresearch.plan`) so it survives context truncation.
 
 ## 2. Scale decision
 
@@ -57,7 +82,9 @@ After researchers return, read their output files and critically assess:
 - Are there contradictions needing resolution?
 - Is any key angle missing entirely?
 
-If gaps are significant, spawn another targeted batch of researchers. No fixed cap on rounds — iterate until evidence is sufficient or sources are exhausted. Update the stored plan with `memory_remember` as it evolves.
+If gaps are significant, spawn another targeted batch of researchers. No fixed cap on rounds — iterate until evidence is sufficient or sources are exhausted.
+
+Update the plan artifact (`outputs/.plans/deepresearch-plan.md`) decision log after each round.
 
 Most topics need 1-2 rounds. Stop when additional rounds would not materially change conclusions.
 
@@ -84,21 +111,50 @@ Save this draft to a temp file (e.g., `draft.md` in the chain artifacts dir or a
 
 ## 6. Cite
 
-Spawn the `citation` agent to post-process YOUR draft. The citation agent adds inline citations, verifies every source URL, and produces the final output:
+Spawn the `verifier` agent to post-process YOUR draft. The verifier agent adds inline citations, verifies every source URL, and produces the final output:
 
 ```
-{ agent: "citation", task: "Add inline citations to draft.md using the research files as source material. Verify every URL.", output: "brief.md" }
+{ agent: "verifier", task: "Add inline citations to draft.md using the research files as source material. Verify every URL.", output: "brief.md" }
 ```
 
-The citation agent does not rewrite the report — it only anchors claims to sources and builds the numbered Sources section.
+The verifier agent does not rewrite the report — it only anchors claims to sources and builds the numbered Sources section.
 
-## 7. Deliver
+## 7. Verify
 
-Copy the final cited output to the appropriate folder:
+Spawn the `reviewer` agent against the cited draft. The reviewer checks for:
+- Unsupported claims that slipped past citation
+- Logical gaps or contradictions between sections
+- Single-source claims on critical findings
+- Overstated confidence relative to evidence quality
+
+```
+{ agent: "reviewer", task: "Verify brief.md — flag any claims that lack sufficient source backing, identify logical gaps, and check that confidence levels match evidence strength. This is a verification pass, not a peer review.", output: "verification.md" }
+```
+
+If the reviewer flags FATAL issues, fix them in the brief before delivering. MAJOR issues get noted in the Open Questions section. MINOR issues are accepted.
+
+## 8. Deliver
+
+Copy the final cited and verified output to the appropriate folder:
 - Paper-style drafts → `papers/`
 - Everything else → `outputs/`
 
 Use a descriptive filename based on the topic.
+
+Write a provenance record alongside the main artifact as `<filename>.provenance.md`:
+
+```markdown
+# Provenance: [topic]
+
+- **Date:** [date]
+- **Rounds:** [number of researcher rounds]
+- **Sources consulted:** [total unique sources across all research files]
+- **Sources accepted:** [sources that survived citation verification]
+- **Sources rejected:** [dead links, unverifiable, or removed]
+- **Verification:** [PASS / PASS WITH NOTES — summary of reviewer findings]
+- **Plan:** outputs/.plans/deepresearch-plan.md
+- **Research files:** [list of intermediate research-*.md files]
+```
 
 ## Background execution
 

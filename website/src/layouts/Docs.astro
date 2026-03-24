@@ -1,0 +1,79 @@
+---
+import Base from './Base.astro';
+import Sidebar from '../components/Sidebar.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  currentSlug: string;
+}
+
+const { title, description, currentSlug } = Astro.props;
+---
+
+<Base title={`${title} — Feynman Docs`} description={description} active="docs">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="flex gap-8">
+      <Sidebar currentSlug={currentSlug} />
+
+      <button id="mobile-menu-btn" class="lg:hidden fixed bottom-6 right-6 z-40 p-3 rounded-full bg-accent text-bg shadow-lg" aria-label="Toggle sidebar">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+
+      <div id="mobile-overlay" class="hidden fixed inset-0 bg-black/50 z-30 lg:hidden"></div>
+
+      <article class="flex-1 min-w-0 py-8 max-w-3xl">
+        <h1 class="text-3xl font-bold mb-8 tracking-tight">{title}</h1>
+        <div class="prose">
+          <slot />
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <script is:inline>
+    (function() {
+      function init() {
+        var btn = document.getElementById('mobile-menu-btn');
+        var sidebar = document.getElementById('sidebar');
+        var overlay = document.getElementById('mobile-overlay');
+        if (btn && sidebar && overlay) {
+          function toggle() {
+            sidebar.classList.toggle('hidden');
+            sidebar.classList.toggle('fixed');
+            sidebar.classList.toggle('inset-0');
+            sidebar.classList.toggle('z-40');
+            sidebar.classList.toggle('bg-bg');
+            sidebar.classList.toggle('w-full');
+            sidebar.classList.toggle('p-6');
+            overlay.classList.toggle('hidden');
+          }
+          btn.addEventListener('click', toggle);
+          overlay.addEventListener('click', toggle);
+        }
+
+        document.querySelectorAll('.prose pre').forEach(function(pre) {
+          if (pre.querySelector('.copy-code')) return;
+          var copyBtn = document.createElement('button');
+          copyBtn.className = 'copy-code';
+          copyBtn.setAttribute('aria-label', 'Copy code');
+          copyBtn.innerHTML = '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+          pre.appendChild(copyBtn);
+          copyBtn.addEventListener('click', function() {
+            var code = pre.querySelector('code');
+            var text = code ? code.textContent : pre.textContent;
+            navigator.clipboard.writeText(text);
+            copyBtn.innerHTML = '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+            setTimeout(function() {
+              copyBtn.innerHTML = '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+            }, 2000);
+          });
+        });
+      }
+      document.addEventListener('DOMContentLoaded', init);
+      document.addEventListener('astro:after-swap', init);
+    })();
+  </script>
+</Base>
