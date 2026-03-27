@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { delimiter, dirname, resolve } from "node:path";
 
 import {
 	BROWSER_FALLBACK_PATHS,
@@ -83,11 +83,11 @@ export function buildPiEnv(options: PiRuntimeOptions): NodeJS.ProcessEnv {
 
 	const currentPath = process.env.PATH ?? "";
 	const binEntries = [paths.nodeModulesBinPath, resolve(paths.piWorkspaceNodeModulesPath, ".bin"), feynmanNpmBinPath];
-	const binPath = binEntries.join(":");
+	const binPath = binEntries.join(delimiter);
 
 	return {
 		...process.env,
-		PATH: `${binPath}:${currentPath}`,
+		PATH: `${binPath}${delimiter}${currentPath}`,
 		FEYNMAN_VERSION: options.feynmanVersion,
 		FEYNMAN_SESSION_DIR: options.sessionDir,
 		FEYNMAN_MEMORY_DIR: resolve(dirname(options.feynmanAgentDir), "memory"),
@@ -100,7 +100,10 @@ export function buildPiEnv(options: PiRuntimeOptions): NodeJS.ProcessEnv {
 		MERMAID_CLI_PATH: process.env.MERMAID_CLI_PATH ?? resolveExecutable("mmdc", MERMAID_FALLBACK_PATHS),
 		PUPPETEER_EXECUTABLE_PATH:
 			process.env.PUPPETEER_EXECUTABLE_PATH ?? resolveExecutable("google-chrome", BROWSER_FALLBACK_PATHS),
-		NPM_CONFIG_PREFIX: process.env.NPM_CONFIG_PREFIX ?? feynmanNpmPrefixPath,
-		npm_config_prefix: process.env.npm_config_prefix ?? feynmanNpmPrefixPath,
+		// Always pin npm's global prefix to the Feynman workspace. npm injects
+		// lowercase config vars into child processes, which would otherwise leak
+		// the caller's global prefix into Pi.
+		NPM_CONFIG_PREFIX: feynmanNpmPrefixPath,
+		npm_config_prefix: feynmanNpmPrefixPath,
 	};
 }
