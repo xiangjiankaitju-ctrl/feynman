@@ -4,6 +4,7 @@ import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { FEYNMAN_LOGO_HTML } from "../logo.mjs";
+import { PI_SUBAGENTS_PATCH_TARGETS, patchPiSubagentsSource } from "./lib/pi-subagents-patch.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const appRoot = resolve(here, "..");
@@ -54,6 +55,7 @@ const interactiveThemePath = piPackageRoot ? resolve(piPackageRoot, "dist", "mod
 const terminalPath = piTuiRoot ? resolve(piTuiRoot, "dist", "terminal.js") : null;
 const editorPath = piTuiRoot ? resolve(piTuiRoot, "dist", "components", "editor.js") : null;
 const workspaceRoot = resolve(appRoot, ".feynman", "npm", "node_modules");
+const piSubagentsRoot = resolve(workspaceRoot, "pi-subagents");
 const webAccessPath = resolve(workspaceRoot, "pi-web-access", "index.ts");
 const sessionSearchIndexerPath = resolve(
 	workspaceRoot,
@@ -242,6 +244,19 @@ function ensurePandoc() {
 }
 
 ensurePandoc();
+
+if (existsSync(piSubagentsRoot)) {
+	for (const relativePath of PI_SUBAGENTS_PATCH_TARGETS) {
+		const entryPath = resolve(piSubagentsRoot, relativePath);
+		if (!existsSync(entryPath)) continue;
+
+		const source = readFileSync(entryPath, "utf8");
+		const patched = patchPiSubagentsSource(relativePath, source);
+		if (patched !== source) {
+			writeFileSync(entryPath, patched, "utf8");
+		}
+	}
+}
 
 if (packageJsonPath && existsSync(packageJsonPath)) {
 	const pkg = JSON.parse(readFileSync(packageJsonPath, "utf8"));
