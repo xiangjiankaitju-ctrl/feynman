@@ -1,11 +1,11 @@
 ---
 title: Installation
-description: Install Feynman on macOS, Linux, or Windows using the standalone installer.
+description: Install Feynman on macOS, Linux, or Windows with curl or npm.
 section: Getting Started
 order: 1
 ---
 
-Feynman ships as a standalone runtime bundle for macOS, Linux, and Windows. The one-line installer downloads a prebuilt native bundle with zero external runtime dependencies.
+Feynman can be installed either as a standalone runtime bundle or as an npm package. For most users, the standalone installer is the simplest path because it downloads a prebuilt native bundle with zero external runtime dependencies.
 
 ## One-line installer (recommended)
 
@@ -27,15 +27,37 @@ irm https://feynman.is/install.ps1 | iex
 
 This installs the Windows runtime bundle under `%LOCALAPPDATA%\Programs\feynman`, adds its launcher to your user `PATH`, and lets you re-run the installer at any time to update.
 
+## Alternative: npm install
+
+If you prefer installing Feynman into an existing Node.js environment, use npm instead:
+
+```bash
+npm install -g @companion-ai/feynman
+```
+
+This path uses your local Node.js runtime instead of the bundled standalone runtime. It requires a compatible Node.js version that satisfies Feynman's current engine range: `>=20.19.0 <25`.
+
 ## Updating the standalone app
 
 To update the standalone Feynman app on macOS, Linux, or Windows, rerun the installer you originally used. That replaces the downloaded runtime bundle with the latest tagged release.
 
 `feynman update` is different: it updates installed Pi packages inside Feynman's environment, not the standalone app bundle itself.
 
+If you installed Feynman with npm, upgrade it with:
+
+```bash
+npm install -g @companion-ai/feynman@latest
+```
+
 ## Uninstalling
 
 Feynman does not currently ship a dedicated `uninstall` command. Remove the standalone launcher and runtime bundle directly, then optionally remove the Feynman home directory if you also want to delete settings, sessions, and installed package state. If you also want to clear alphaXiv login state, remove `~/.ahub`.
+
+If you installed Feynman with npm, uninstall it with:
+
+```bash
+npm uninstall -g @companion-ai/feynman
+```
 
 On macOS or Linux:
 
@@ -123,15 +145,3 @@ feynman --version
 ```
 
 If you see a version number, you are ready to go. Run `feynman doctor` at any time to diagnose configuration issues, missing dependencies, or authentication problems.
-
-## Local development
-
-For contributing or running Feynman from source:
-
-```bash
-git clone https://github.com/getcompanion-ai/feynman.git
-cd feynman
-nvm use || nvm install
-npm install
-npm start
-```
