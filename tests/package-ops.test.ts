@@ -101,6 +101,7 @@ test("seedBundledWorkspacePackages repairs broken existing bundled packages", ()
 
 	assert.deepEqual(seeded, ["npm:pi-markdown-preview"]);
 	assert.equal(lstatSync(existingPackageDir).isSymbolicLink(), true);
+	assert.equal(lstatSync(resolve(homeRoot, "npm-global", "lib", "node_modules", "puppeteer-core")).isSymbolicLink(), true);
 	assert.equal(
 		readFileSync(resolve(existingPackageDir, "package.json"), "utf8").includes('"version": "1.0.0"'),
 		true,

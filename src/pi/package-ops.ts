@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { cpSync, existsSync, lstatSync, mkdirSync, readFileSync, readlinkSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, readlinkSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
 
@@ -427,6 +427,28 @@ function packageNameToPath(root: string, packageName: string): string {
 	return resolve(root, packageName);
 }
 
+function listBundledWorkspacePackageNames(root: string): string[] {
+	if (!existsSync(root)) {
+		return [];
+	}
+
+	const names: string[] = [];
+	for (const entry of readdirSync(root, { withFileTypes: true })) {
+		if (!entry.isDirectory() && !entry.isSymbolicLink()) continue;
+		if (entry.name.startsWith(".")) continue;
+		if (entry.name.startsWith("@")) {
+			const scopeRoot = resolve(root, entry.name);
+			for (const scopedEntry of readdirSync(scopeRoot, { withFileTypes: true })) {
+				if (!scopedEntry.isDirectory() && !scopedEntry.isSymbolicLink()) continue;
+				names.push(`${entry.name}/${scopedEntry.name}`);
+			}
+			continue;
+		}
+		names.push(entry.name);
+	}
+	return names;
+}
+
 function packageDependencyExists(packagePath: string, globalNodeModulesRoot: string, dependency: string): boolean {
 	return existsSync(packageNameToPath(resolve(packagePath, "node_modules"), dependency)) ||
 		existsSync(packageNameToPath(globalNodeModulesRoot, dependency));
@@ -464,6 +486,23 @@ function replaceBrokenPackageWithBundledCopy(targetPath: string, bundledPackageP
 	return true;
 }
 
+function seedBundledPackage(globalNodeModulesRoot: string, bundledNodeModulesRoot: string, packageName: string): boolean {
+	const bundledPackagePath = resolve(bundledNodeModulesRoot, packageName);
+	if (!existsSync(bundledPackagePath)) {
+		return false;
+	}
+
+	const targetPath = resolve(globalNodeModulesRoot, packageName);
+	if (replaceBrokenPackageWithBundledCopy(targetPath, bundledPackagePath, globalNodeModulesRoot)) {
+		return true;
+	}
+	if (!existsSync(targetPath)) {
+		linkDirectory(targetPath, bundledPackagePath);
+		return true;
+	}
+	return false;
+}
+
 export function seedBundledWorkspacePackages(
 	agentDir: string,
 	appRoot: string,
@@ -476,6 +515,10 @@ export function seedBundledWorkspacePackages(
 
 	const globalNodeModulesRoot = resolve(getFeynmanNpmPrefixPath(agentDir), "lib", "node_modules");
 	const seeded: string[] = [];
+	const bundledPackageNames = listBundledWorkspacePackageNames(bundledNodeModulesRoot);
+	for (const packageName of bundledPackageNames) {
+		seedBundledPackage(globalNodeModulesRoot, bundledNodeModulesRoot, packageName);
+	}
 
 	for (const source of sources) {
 		if (shouldSkipNativeSource(source)) continue;
@@ -483,16 +526,8 @@ export function seedBundledWorkspacePackages(
 		const parsed = parseNpmSource(source);
 		if (!parsed) continue;
 
-		const bundledPackagePath = resolve(bundledNodeModulesRoot, parsed.name);
-		if (!existsSync(bundledPackagePath)) continue;
-
 		const targetPath = resolve(globalNodeModulesRoot, parsed.name);
-		if (replaceBrokenPackageWithBundledCopy(targetPath, bundledPackagePath, globalNodeModulesRoot)) {
-			seeded.push(source);
-			continue;
-		}
-		if (!existsSync(targetPath)) {
-			linkDirectory(targetPath, bundledPackagePath);
+		if (pathsMatchSymlinkTarget(targetPath, resolve(bundledNodeModulesRoot, parsed.name))) {
 			seeded.push(source);
 		}
 	}

@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { existsSync, lstatSync, mkdirSync, readFileSync, readlinkSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, readlinkSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { homedir } from "node:os";
 import { delimiter, dirname, resolve } from "node:path";
@@ -286,28 +286,53 @@ function linkPointsTo(linkPath, targetPath) {
 	}
 }
 
+function listWorkspacePackageNames(root) {
+	if (!existsSync(root)) return [];
+	const names = [];
+	for (const entry of readdirSync(root, { withFileTypes: true })) {
+		if (!entry.isDirectory() && !entry.isSymbolicLink()) continue;
+		if (entry.name.startsWith(".")) continue;
+		if (entry.name.startsWith("@")) {
+			const scopeRoot = resolve(root, entry.name);
+			for (const scopedEntry of readdirSync(scopeRoot, { withFileTypes: true })) {
+				if (!scopedEntry.isDirectory() && !scopedEntry.isSymbolicLink()) continue;
+				names.push(`${entry.name}/${scopedEntry.name}`);
+			}
+			continue;
+		}
+		names.push(entry.name);
+	}
+	return names;
+}
+
+function linkBundledPackage(packageName) {
+	const sourcePath = resolve(workspaceRoot, packageName);
+	const targetPath = resolve(globalNodeModulesRoot, packageName);
+	if (!existsSync(sourcePath)) return false;
+	if (linkPointsTo(targetPath, sourcePath)) return false;
+	try {
+		if (lstatSync(targetPath).isSymbolicLink()) {
+			rmSync(targetPath, { force: true });
+		} else if (!installedPackageLooksUsable(targetPath, globalNodeModulesRoot)) {
+			rmSync(targetPath, { recursive: true, force: true });
+		}
+	} catch {}
+	if (existsSync(targetPath)) return false;
+
+	ensureParentDir(targetPath);
+	try {
+		symlinkSync(sourcePath, targetPath, process.platform === "win32" ? "junction" : "dir");
+		return true;
+	} catch {
+		return false;
+	}
+}
+
 function ensureBundledPackageLinks(packageSpecs) {
 	if (!workspaceMatchesRuntime(packageSpecs)) return;
 
-	for (const spec of packageSpecs) {
-		const packageName = parsePackageName(spec);
-		const sourcePath = resolve(workspaceRoot, packageName);
-		const targetPath = resolve(globalNodeModulesRoot, packageName);
-		if (!existsSync(sourcePath)) continue;
-		if (linkPointsTo(targetPath, sourcePath)) continue;
-		try {
-			if (lstatSync(targetPath).isSymbolicLink()) {
-				rmSync(targetPath, { force: true });
-			} else if (!installedPackageLooksUsable(targetPath, globalNodeModulesRoot)) {
-				rmSync(targetPath, { recursive: true, force: true });
-			}
-		} catch {}
-		if (existsSync(targetPath)) continue;
-
-		ensureParentDir(targetPath);
-		try {
-			symlinkSync(sourcePath, targetPath, process.platform === "win32" ? "junction" : "dir");
-		} catch {}
+	for (const packageName of listWorkspacePackageNames(workspaceRoot)) {
+		linkBundledPackage(packageName);
 	}
 }
 
