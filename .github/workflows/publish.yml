@@ -130,10 +130,17 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v6
       - uses: actions/download-artifact@v4
         with:
           path: release-assets
           merge-multiple: true
+      - name: Build release notes
+        shell: bash
+        env:
+          VERSION: ${{ needs.version-check.outputs.version }}
+        run: |
+          node scripts/extract-release-notes.mjs "$VERSION" "$RUNNER_TEMP/release-notes.md"
       - name: Create GitHub release
         shell: bash
         env:
@@ -145,12 +152,12 @@ jobs:
             gh release upload "v$VERSION" release-assets/* --clobber
             gh release edit "v$VERSION" \
               --title "v$VERSION" \
-              --notes "Standalone Feynman bundles for native installation." \
+              --notes-file "$RUNNER_TEMP/release-notes.md" \
               --draft=false \
               --latest
           else
             gh release create "v$VERSION" release-assets/* \
               --title "v$VERSION" \
-              --notes "Standalone Feynman bundles for native installation." \
+              --notes-file "$RUNNER_TEMP/release-notes.md" \
               --target "$GITHUB_SHA"
           fi

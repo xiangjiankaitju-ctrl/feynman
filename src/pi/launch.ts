@@ -13,9 +13,20 @@ export function exitCodeFromSignal(signal: NodeJS.Signals): number {
 export async function launchPiChat(options: PiRuntimeOptions): Promise<void> {
 	ensureSupportedNodeVersion();
 
-	const { piCliPath, promisePolyfillPath, promisePolyfillSourcePath, tsxLoaderPath } = resolvePiPaths(options.appRoot);
+	const {
+		piCliPath,
+		piMainPath,
+		piCliWrapperPath,
+		piCliWrapperSourcePath,
+		promisePolyfillPath,
+		promisePolyfillSourcePath,
+		tsxLoaderPath,
+	} = resolvePiPaths(options.appRoot);
 	if (!existsSync(piCliPath)) {
 		throw new Error(`Pi CLI not found: ${piCliPath}`);
+	}
+	if (!existsSync(piMainPath)) {
+		throw new Error(`Pi main module not found: ${piMainPath}`);
 	}
 
 	const useBuiltPolyfill = existsSync(promisePolyfillPath);
@@ -24,15 +35,22 @@ export async function launchPiChat(options: PiRuntimeOptions): Promise<void> {
 		throw new Error(`Promise polyfill not found: ${promisePolyfillPath}`);
 	}
 
+	const useBuiltWrapper = existsSync(piCliWrapperPath);
+	const useDevWrapper = !useBuiltWrapper && existsSync(piCliWrapperSourcePath) && existsSync(tsxLoaderPath);
+	if (!useBuiltWrapper && !useDevWrapper) {
+		throw new Error(`Feynman Pi CLI wrapper not found: ${piCliWrapperPath}`);
+	}
+
 	if (process.stdout.isTTY && options.mode !== "rpc") {
 		process.stdout.write("\x1b[2J\x1b[3J\x1b[H");
 	}
 
+	const wrapperPath = useBuiltWrapper ? piCliWrapperPath : piCliWrapperSourcePath;
 	const importArgs = useDevPolyfill
 		? ["--import", toNodeImportSpecifier(tsxLoaderPath), "--import", toNodeImportSpecifier(promisePolyfillSourcePath)]
 		: ["--import", toNodeImportSpecifier(promisePolyfillPath)];
 
-	const child = spawn(process.execPath, [...importArgs, piCliPath, ...buildPiArgs(options)], {
+	const child = spawn(process.execPath, [...importArgs, wrapperPath, piMainPath, ...buildPiArgs(options)], {
 		cwd: options.workingDir,
 		stdio: "inherit",
 		env: buildPiEnv(options),

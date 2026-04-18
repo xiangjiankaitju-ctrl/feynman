@@ -4,7 +4,7 @@ import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { resolveInitialPrompt, shouldRunInteractiveSetup } from "../src/cli.js";
+import { resolveInitialPrompt, resolvePiPromptOptions, shouldRunInteractiveSetup } from "../src/cli.js";
 import { buildModelStatusSnapshotFromRecords, chooseRecommendedModel } from "../src/model/catalog.js";
 import { resolveModelProviderForCommand, setDefaultModelSpec } from "../src/model/commands.js";
 import { createModelRegistry } from "../src/model/registry.js";
@@ -176,6 +176,21 @@ test("resolveInitialPrompt maps top-level research commands to Pi slash workflow
 	assert.equal(resolveInitialPrompt("log", [], undefined, workflows), "/log");
 	assert.equal(resolveInitialPrompt("chat", ["hello"], undefined, workflows), "hello");
 	assert.equal(resolveInitialPrompt("unknown", ["topic"], undefined, workflows), "unknown topic");
+});
+
+test("resolvePiPromptOptions keeps top-level workflows interactive when stdin is a tty", () => {
+	const workflows = new Set(["deepresearch", "summarize"]);
+
+	assert.deepEqual(resolvePiPromptOptions("deepresearch", ["BM25"], undefined, workflows), {
+		initialPrompt: "/deepresearch BM25",
+	});
+	assert.deepEqual(resolvePiPromptOptions("chat", ["hello"], undefined, workflows), {
+		initialPrompt: "hello",
+	});
+	assert.deepEqual(resolvePiPromptOptions(undefined, [], "hello", workflows), {
+		oneShotPrompt: "hello",
+	});
+	assert.deepEqual(resolvePiPromptOptions(undefined, [], undefined, workflows), {});
 });
 
 test("shouldRunInteractiveSetup triggers on first run when no default model is configured", () => {

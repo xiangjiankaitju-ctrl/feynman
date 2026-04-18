@@ -346,6 +346,22 @@ export function resolveInitialPrompt(
 	return undefined;
 }
 
+export function resolvePiPromptOptions(
+	command: string | undefined,
+	rest: string[],
+	oneShotPrompt: string | undefined,
+	workflowCommands: Set<string>,
+): { oneShotPrompt?: string; initialPrompt?: string } {
+	const resolvedPrompt = resolveInitialPrompt(command, rest, oneShotPrompt, workflowCommands);
+	if (!resolvedPrompt) {
+		return {};
+	}
+	if (oneShotPrompt) {
+		return { oneShotPrompt: resolvedPrompt };
+	}
+	return { initialPrompt: resolvedPrompt };
+}
+
 export function shouldRunInteractiveSetup(
 	explicitModelSpec: string | undefined,
 	currentModelSpec: string | undefined,
@@ -559,6 +575,7 @@ export async function main(): Promise<void> {
 	}
 
 	const workflowCommandNames = new Set(readPromptSpecs(appRoot).filter((s) => s.topLevelCli).map((s) => s.name));
+	const promptOptions = resolvePiPromptOptions(command, rest, values.prompt, workflowCommandNames);
 	await launchPiChat({
 		appRoot,
 		workingDir,
@@ -568,7 +585,6 @@ export async function main(): Promise<void> {
 		mode,
 		thinkingLevel,
 		explicitModelSpec,
-		oneShotPrompt: values.prompt,
-		initialPrompt: resolveInitialPrompt(command, rest, values.prompt, workflowCommandNames),
+		...promptOptions,
 	});
 }

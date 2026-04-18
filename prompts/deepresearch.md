@@ -7,7 +7,7 @@ topLevelCli: true
 Run deep research for: $@
 
 This is an execution request, not a request to explain or implement the workflow instructions.
-Execute the workflow. Do not answer by describing the protocol, do not explain these instructions, do not restate the protocol, and do not ask for confirmation. Do not stop after planning. Your first actions should be tool calls that create directories and write the plan artifact.
+Execute the workflow. Do not answer by describing the protocol, do not explain these instructions, and do not restate the protocol. Your first actions should be tool calls that create directories and write the plan artifact.
 
 ## Required Artifacts
 
@@ -20,7 +20,7 @@ Every run must leave these files on disk:
 - `outputs/<slug>.md` or `papers/<slug>.md`
 - `outputs/<slug>.provenance.md` or `papers/<slug>.provenance.md`
 
-If any capability fails, continue in degraded mode and still write a blocked or partial final output and provenance sidecar. Never end with chat-only output. Never end with only an explanation in chat. Use `Verification: BLOCKED` when verification could not be completed.
+After the user approves the plan, if any capability fails, continue in degraded mode and still write a blocked or partial final output and provenance sidecar. Never end with chat-only output after plan approval. Never end with only an explanation in chat after plan approval. Use `Verification: BLOCKED` when verification could not be completed.
 
 ## Step 1: Plan
 
@@ -36,7 +36,11 @@ Make the scale decision before assigning owners in the plan. If the topic is a n
 
 Also save the plan with `memory_remember` using key `deepresearch.<slug>.plan` if that tool is available. If it is not available, continue without it.
 
-After writing the plan, continue immediately. Do not pause for approval.
+After writing the plan, stop and ask for explicit confirmation before gathering evidence. Summarize the plan briefly and ask:
+
+`Proceed with this deep research plan? Reply "yes" to continue, or tell me what to change.`
+
+Do not run searches, fetch sources, spawn subagents, draft, cite, review, or deliver final artifacts until the user confirms. If the user requests changes, update `outputs/.plans/<slug>.md` first, then ask for confirmation again.
 
 ## Step 2: Scale
 
@@ -60,8 +64,8 @@ If direct search was chosen:
 - Skip researcher spawning entirely.
 - Search and fetch sources yourself.
 - Use multiple search terms/angles before drafting. Minimum: 3 distinct queries for direct-mode research, covering definition/history, mechanism/formula, and current usage/comparison when relevant.
-- Record the exact search terms used in `<slug>-research-direct.md`.
-- Write notes to `<slug>-research-direct.md`.
+- Record the exact search terms used in `outputs/.drafts/<slug>-research-direct.md`.
+- Write notes to `outputs/.drafts/<slug>-research-direct.md`.
 - Continue to synthesis.
 
 If subagents were chosen:
@@ -132,7 +136,7 @@ After the verifier returns, verify on disk that `outputs/.drafts/<slug>-cited.md
 
 If direct search/no researcher subagents was chosen:
 - Review the cited draft yourself.
-- Write `<slug>-verification.md` with FATAL / MAJOR / MINOR findings and the checks performed.
+- Write `outputs/.drafts/<slug>-verification.md` with FATAL / MAJOR / MINOR findings and the checks performed.
 - Fix FATAL issues before delivery.
 - Do not spawn the `reviewer` subagent for simple direct-search runs.
 

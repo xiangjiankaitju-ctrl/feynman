@@ -38,6 +38,9 @@ export function resolvePiPaths(appRoot: string) {
 	return {
 		piPackageRoot: resolve(appRoot, "node_modules", "@mariozechner", "pi-coding-agent"),
 		piCliPath: resolve(appRoot, "node_modules", "@mariozechner", "pi-coding-agent", "dist", "cli.js"),
+		piMainPath: resolve(appRoot, "node_modules", "@mariozechner", "pi-coding-agent", "dist", "main.js"),
+		piCliWrapperPath: resolve(appRoot, "dist", "pi", "pi-cli-wrapper.js"),
+		piCliWrapperSourcePath: resolve(appRoot, "src", "pi", "pi-cli-wrapper.ts"),
 		promisePolyfillPath: resolve(appRoot, "dist", "system", "promise-polyfill.js"),
 		promisePolyfillSourcePath: resolve(appRoot, "src", "system", "promise-polyfill.ts"),
 		tsxLoaderPath: resolve(appRoot, "node_modules", "tsx", "dist", "loader.mjs"),
@@ -58,6 +61,11 @@ export function validatePiInstallation(appRoot: string): string[] {
 	const missing: string[] = [];
 
 	if (!existsSync(paths.piCliPath)) missing.push(paths.piCliPath);
+	if (!existsSync(paths.piMainPath)) missing.push(paths.piMainPath);
+	if (!existsSync(paths.piCliWrapperPath)) {
+		const hasDevWrapper = existsSync(paths.piCliWrapperSourcePath) && existsSync(paths.tsxLoaderPath);
+		if (!hasDevWrapper) missing.push(paths.piCliWrapperPath);
+	}
 	if (!existsSync(paths.promisePolyfillPath)) {
 		// Dev fallback: allow running from source without `dist/` build artifacts.
 		const hasDevPolyfill = existsSync(paths.promisePolyfillSourcePath) && existsSync(paths.tsxLoaderPath);

@@ -25,7 +25,7 @@ curl -fsSL https://feynman.is/install | bash
 irm https://feynman.is/install.ps1 | iex
 ```
 
-The one-line installer fetches the latest tagged release. To pin a version, pass it explicitly, for example `curl -fsSL https://feynman.is/install | bash -s -- 0.2.31`.
+The one-line installer fetches the latest tagged release. To pin a version, pass it explicitly, for example `curl -fsSL https://feynman.is/install | bash -s -- 0.2.35`.
 
 The installer downloads a standalone native bundle with its own Node.js runtime.
 
@@ -168,4 +168,4 @@ npm run typecheck
 npm run build
 ```
 
-[Docs](https://feynman.is/docs) · [MIT License](LICENSE)
+[Docs](https://feynman.is/docs) · [Release Notes](RELEASES.md) · [MIT License](LICENSE)
