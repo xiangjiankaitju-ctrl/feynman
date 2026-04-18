@@ -7,7 +7,11 @@ import test from "node:test";
 import {
 	CORE_PACKAGE_SOURCES,
 	getOptionalPackagePresetSources,
+	isOptionalPackagePresetSupported,
+	listOptionalPackagePresetInstallTargets,
+	listOptionalPackagePresets,
 	NATIVE_PACKAGE_SOURCES,
+	normalizeOptionalPackagePresetName,
 	shouldPruneLegacyDefaultPackages,
 	supportsNativePackageSources,
 } from "../src/pi/package-presets.js";
@@ -73,8 +77,16 @@ test("normalizeFeynmanSettings prunes the legacy slow default package set", () =
 
 test("optional package presets map friendly aliases", () => {
 	assert.deepEqual(getOptionalPackagePresetSources("memory"), undefined);
-	assert.deepEqual(getOptionalPackagePresetSources("ui"), ["npm:pi-generative-ui"]);
+	assert.deepEqual(getOptionalPackagePresetSources("ui", "darwin"), ["npm:pi-generative-ui"]);
+	assert.deepEqual(getOptionalPackagePresetSources("generative-ui", "linux"), undefined);
+	assert.deepEqual(getOptionalPackagePresetSources("all-extras", "darwin"), ["npm:pi-generative-ui"]);
+	assert.deepEqual(getOptionalPackagePresetSources("all-extras", "linux"), undefined);
 	assert.deepEqual(getOptionalPackagePresetSources("search"), undefined);
+	assert.equal(normalizeOptionalPackagePresetName("ui"), "generative-ui");
+	assert.equal(isOptionalPackagePresetSupported("generative-ui", "darwin"), true);
+	assert.equal(isOptionalPackagePresetSupported("generative-ui", "linux"), false);
+	assert.deepEqual(listOptionalPackagePresets("linux"), []);
+	assert.deepEqual(listOptionalPackagePresetInstallTargets("linux"), []);
 	assert.equal(shouldPruneLegacyDefaultPackages(["npm:custom"]), false);
 });
 

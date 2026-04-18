@@ -28,10 +28,12 @@ export const OPTIONAL_PACKAGE_PRESETS = {
 	"generative-ui": {
 		description: "Interactive Glimpse UI widgets.",
 		sources: ["npm:pi-generative-ui"],
+		platforms: ["darwin"],
 	},
 } as const;
 
 export type OptionalPackagePresetName = keyof typeof OPTIONAL_PACKAGE_PRESETS;
+export type OptionalPackagePresetAlias = OptionalPackagePresetName | "ui" | "all-extras";
 
 const LEGACY_DEFAULT_PACKAGE_SOURCES = [
 	...CORE_PACKAGE_SOURCES,
@@ -75,24 +77,51 @@ export function filterPackageSourcesForCurrentNode<T extends string>(sources: re
 	return sources.filter((source) => !blocked.has(source));
 }
 
-export function getOptionalPackagePresetSources(name: string): string[] | undefined {
+export function normalizeOptionalPackagePresetName(name: string): OptionalPackagePresetName | "all-extras" | undefined {
 	const normalized = name.trim().toLowerCase();
 	if (normalized === "ui") {
-		return [...OPTIONAL_PACKAGE_PRESETS["generative-ui"].sources];
+		return "generative-ui";
 	}
-
-	const preset = OPTIONAL_PACKAGE_PRESETS[normalized as OptionalPackagePresetName];
-	return preset ? [...preset.sources] : undefined;
+	if (normalized === "all-extras") {
+		return "all-extras";
+	}
+	return normalized in OPTIONAL_PACKAGE_PRESETS ? (normalized as OptionalPackagePresetName) : undefined;
 }
 
-export function listOptionalPackagePresets(): Array<{
+export function isOptionalPackagePresetSupported(name: OptionalPackagePresetName, platform: NodeJS.Platform = process.platform): boolean {
+	const platforms = OPTIONAL_PACKAGE_PRESETS[name].platforms as readonly NodeJS.Platform[] | undefined;
+	return !platforms || platforms.includes(platform);
+}
+
+export function getOptionalPackagePresetSources(name: string, platform: NodeJS.Platform = process.platform): string[] | undefined {
+	const normalized = normalizeOptionalPackagePresetName(name);
+	if (!normalized) return undefined;
+
+	if (normalized === "all-extras") {
+		const sources = listOptionalPackagePresets(platform).flatMap((preset) => preset.sources);
+		return sources.length > 0 ? sources : undefined;
+	}
+
+	if (!isOptionalPackagePresetSupported(normalized, platform)) return undefined;
+	return [...OPTIONAL_PACKAGE_PRESETS[normalized].sources];
+}
+
+export function listOptionalPackagePresets(platform?: NodeJS.Platform): Array<{
 	name: OptionalPackagePresetName;
 	description: string;
 	sources: string[];
 }> {
-	return Object.entries(OPTIONAL_PACKAGE_PRESETS).map(([name, preset]) => ({
+	const currentPlatform = platform ?? process.platform;
+	return Object.entries(OPTIONAL_PACKAGE_PRESETS).filter(([name]) =>
+		isOptionalPackagePresetSupported(name as OptionalPackagePresetName, currentPlatform),
+	).map(([name, preset]) => ({
 		name: name as OptionalPackagePresetName,
 		description: preset.description,
 		sources: [...preset.sources],
 	}));
+}
+
+export function listOptionalPackagePresetInstallTargets(platform?: NodeJS.Platform): string[] {
+	const names = listOptionalPackagePresets(platform).map((preset) => preset.name);
+	return names.length > 0 ? [...names, "all-extras"] : [];
 }

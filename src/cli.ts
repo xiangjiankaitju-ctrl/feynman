@@ -18,7 +18,14 @@ import { ensureFeynmanHome, getDefaultSessionDir, getFeynmanAgentDir, getFeynman
 import { launchPiChat } from "./pi/launch.js";
 import { installPackageSources, updateConfiguredPackages } from "./pi/package-ops.js";
 import { MAX_NATIVE_PACKAGE_NODE_MAJOR } from "./pi/package-presets.js";
-import { CORE_PACKAGE_SOURCES, getOptionalPackagePresetSources, listOptionalPackagePresets } from "./pi/package-presets.js";
+import {
+	CORE_PACKAGE_SOURCES,
+	getOptionalPackagePresetSources,
+	isOptionalPackagePresetSupported,
+	listOptionalPackagePresetInstallTargets,
+	listOptionalPackagePresets,
+	normalizeOptionalPackagePresetName,
+} from "./pi/package-presets.js";
 import { normalizeFeynmanSettings, normalizeThinkingLevel, parseModelSpec } from "./pi/settings.js";
 import { applyFeynmanPackageManagerEnv } from "./pi/runtime.js";
 import { getConfiguredServiceTier, normalizeServiceTier, setConfiguredServiceTier } from "./model/service-tier.js";
@@ -228,11 +235,17 @@ async function handlePackagesCommand(subcommand: string | undefined, args: strin
 			printInfo(source);
 		}
 		printSection("Optional");
-		for (const preset of listOptionalPackagePresets()) {
+		const optionalPresets = listOptionalPackagePresets();
+		if (optionalPresets.length === 0) {
+			printInfo(`No optional package presets are available on ${process.platform}.`);
+			printInfo("Core packages already include memory and session search.");
+			return;
+		}
+		for (const preset of optionalPresets) {
 			const installed = preset.sources.every((source) => configuredSources.has(source));
 			printInfo(`${preset.name}${installed ? " (installed)" : ""}  ${preset.description}`);
 		}
-		printInfo("Install with: feynman packages install <preset>");
+		printInfo(`Install with: feynman packages install <${listOptionalPackagePresetInstallTargets().join("|")}>`);
 		return;
 	}
 
@@ -242,11 +255,32 @@ async function handlePackagesCommand(subcommand: string | undefined, args: strin
 
 	const target = args[0];
 	if (!target) {
-		throw new Error("Usage: feynman packages install <generative-ui|memory|session-search|all-extras>");
+		const installTargets = listOptionalPackagePresetInstallTargets();
+		if (installTargets.length === 0) {
+			throw new Error(`No optional package presets are available on ${process.platform}. Core packages already include memory and session search.`);
+		}
+		throw new Error(`Usage: feynman packages install <${installTargets.join("|")}>`);
 	}
 
 	const sources = getOptionalPackagePresetSources(target);
 	if (!sources) {
+		const normalizedPreset = normalizeOptionalPackagePresetName(target);
+		if (normalizedPreset === "all-extras") {
+			console.log(`No optional package presets are available on ${process.platform}.`);
+			console.log("Core packages already include memory and session search.");
+			return;
+		}
+		if (normalizedPreset && !isOptionalPackagePresetSupported(normalizedPreset)) {
+			console.log(`${normalizedPreset} is not available on ${process.platform}.`);
+			if (normalizedPreset === "generative-ui") {
+				console.log("The upstream pi-generative-ui package currently supports macOS only.");
+			}
+			return;
+		}
+		if (target === "memory" || target === "session-search") {
+			console.log(`${target} is installed by default as a core package.`);
+			return;
+		}
 		throw new Error(`Unknown package preset: ${target}`);
 	}
 

@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
-import { stripPiSubagentBuiltinModelSource } from "./lib/pi-subagents-patch.mjs";
+import { PI_SUBAGENTS_PATCH_TARGETS, patchPiSubagentsSource, stripPiSubagentBuiltinModelSource } from "./lib/pi-subagents-patch.mjs";
 
 const appRoot = resolve(import.meta.dirname, "..");
 const settingsPath = resolve(appRoot, ".feynman", "settings.json");
@@ -72,7 +72,7 @@ function hashFile(path) {
 
 function getRuntimeInputHash() {
 	const hash = createHash("sha256");
-	for (const path of [packageJsonPath, packageLockPath, settingsPath]) {
+	for (const path of [packageJsonPath, packageLockPath, settingsPath, resolve(appRoot, "scripts", "lib", "pi-subagents-patch.mjs")]) {
 		hash.update(path);
 		hash.update("\0");
 		hash.update(hashFile(path) ?? "missing");
@@ -186,13 +186,29 @@ function pruneWorkspace() {
 	}
 }
 
-function stripBundledPiSubagentModelPins() {
-	const agentsRoot = resolve(workspaceNodeModulesDir, "pi-subagents", "agents");
-	if (!existsSync(agentsRoot)) {
+function patchBundledPiSubagents() {
+	const piSubagentsRoot = resolve(workspaceNodeModulesDir, "pi-subagents");
+	if (!existsSync(piSubagentsRoot)) {
 		return false;
 	}
 
 	let changed = false;
+	for (const relativePath of PI_SUBAGENTS_PATCH_TARGETS) {
+		const entryPath = resolve(piSubagentsRoot, relativePath);
+		if (!existsSync(entryPath)) continue;
+
+		const source = readFileSync(entryPath, "utf8");
+		const patched = patchPiSubagentsSource(relativePath, source);
+		if (patched === source) continue;
+		writeFileSync(entryPath, patched, "utf8");
+		changed = true;
+	}
+
+	const agentsRoot = resolve(piSubagentsRoot, "agents");
+	if (!existsSync(agentsRoot)) {
+		return changed;
+	}
+
 	for (const entry of readdirSync(agentsRoot, { withFileTypes: true })) {
 		if (!entry.isFile() || !entry.name.endsWith(".md")) continue;
 		const entryPath = resolve(agentsRoot, entry.name);
@@ -228,9 +244,9 @@ const packageSpecs = readPackageSpecs();
 
 if (workspaceIsCurrent(packageSpecs)) {
 	console.log("[feynman] vendored runtime workspace already up to date");
-	if (stripBundledPiSubagentModelPins()) {
+	if (patchBundledPiSubagents()) {
 		writeManifest(packageSpecs);
-		console.log("[feynman] stripped bundled pi-subagents model pins");
+		console.log("[feynman] patched bundled pi-subagents");
 	}
 	if (archiveIsCurrent()) {
 		process.exit(0);
@@ -244,7 +260,7 @@ if (workspaceIsCurrent(packageSpecs)) {
 console.log("[feynman] preparing vendored runtime workspace...");
 prepareWorkspace(packageSpecs);
 pruneWorkspace();
-stripBundledPiSubagentModelPins();
+patchBundledPiSubagents();
 writeManifest(packageSpecs);
 createWorkspaceArchive();
 console.log("[feynman] vendored runtime workspace ready");

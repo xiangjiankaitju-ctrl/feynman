@@ -129,6 +129,7 @@ export function buildPiEnv(options: PiRuntimeOptions): NodeJS.ProcessEnv {
 		FEYNMAN_WEB_SEARCH_CONFIG: feynmanWebSearchConfigPath,
 		FEYNMAN_NODE_EXECUTABLE: process.execPath,
 		FEYNMAN_BIN_PATH: resolve(options.appRoot, "bin", "feynman.js"),
+		FEYNMAN_PI_CLI_PATH: paths.piCliPath,
 		FEYNMAN_NPM_PREFIX: feynmanNpmPrefixPath,
 		// Ensure the Pi child process uses Feynman's agent dir for auth/models/settings.
 		// Patched Pi uses FEYNMAN_CODING_AGENT_DIR; upstream Pi uses PI_CODING_AGENT_DIR.

@@ -7,6 +7,27 @@ order: 4
 
 This page summarizes what changed in recent Feynman releases. GitHub releases use the same version-specific notes from the repository `RELEASES.md` file.
 
+## v0.2.36 - 2026-04-18
+
+### Fixes
+
+- Hardened `/review` so it writes a durable plan, evidence notes, and `outputs/<slug>-review.md` instead of stopping after a planning/narration response.
+- Added blocked-review fallback behavior for PDFs or external sources that cannot be parsed, so failed extraction still produces an explicit review artifact with `Verification: BLOCKED`.
+- Fixed subagent child-process spawning under Feynman's Pi wrapper so writer/reviewer subagents no longer treat `--mode` as a module path.
+- Made optional package presets platform-aware so Linux users do not see or attempt to install the macOS-only `generative-ui` package.
+- Added the Release Notes entry to the website docs sidebar.
+
+### Documentation
+
+- Updated peer review docs to describe the concrete output files and blocked-extraction behavior.
+- Updated package docs to clarify that memory and session search are core packages and `generative-ui` is macOS-only upstream.
+
+### Validation
+
+- Added regression coverage for the `/review` durable-artifact contract.
+- Added regression coverage for platform-aware optional presets and Feynman-aware subagent spawning.
+- Real installed-global review, package-list/install, subagent, and extension-load checks were run before release.
+
 ## v0.2.35 - 2026-04-18
 
 ### Fixes

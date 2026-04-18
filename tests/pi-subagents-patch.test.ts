@@ -274,6 +274,29 @@ test("patchPiSubagentsSource documents output in top-level parallel help", () =>
 	assert.doesNotMatch(patched, /function resolvePiAgentDir/);
 });
 
+test("patchPiSubagentsSource makes pi-spawn prefer the real Pi CLI over Feynman wrapper", () => {
+	const input = [
+		"export function resolveWindowsPiCliScript(deps: PiSpawnDeps = {}): string | undefined {",
+		"\tconst existsSync = deps.existsSync ?? fs.existsSync;",
+		'\tconst readFileSync = deps.readFileSync ?? ((filePath, encoding) => fs.readFileSync(filePath, encoding));',
+		"\tconst argv1 = deps.argv1 ?? process.argv[1];",
+		"",
+		"\tif (argv1) {",
+		"\t\tconst argvPath = normalizePath(argv1);",
+		"\t\tif (isRunnableNodeScript(argvPath, existsSync)) {",
+		"\t\t\treturn argvPath;",
+		"\t\t}",
+		"\t}",
+		"}",
+	].join("\n");
+
+	const patched = patchPiSubagentsSource("pi-spawn.ts", input);
+
+	assert.match(patched, /process\.env\.FEYNMAN_PI_CLI_PATH/);
+	assert.match(patched, /path\.basename\(argvPath\) !== "pi-cli-wrapper\.js"/);
+	assert.doesNotMatch(patched, /resolvePiAgentDir/);
+});
+
 test("stripPiSubagentBuiltinModelSource removes built-in model pins", () => {
 	const input = [
 		"---",

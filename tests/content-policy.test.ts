@@ -115,6 +115,22 @@ test("deepresearch keeps subagent tool calls small and skips subagents for narro
 	assert.match(deepResearchPrompt, /if a PDF parser or paper fetch fails/i);
 });
 
+test("review workflow must write final artifacts instead of stopping after planning", () => {
+	const reviewPrompt = readFileSync(join(repoRoot, "prompts", "review.md"), "utf8");
+
+	assert.match(reviewPrompt, /not a request to explain or implement/i);
+	assert.match(reviewPrompt, /Do not ask for confirmation/i);
+	assert.match(reviewPrompt, /continue immediately/i);
+	assert.match(reviewPrompt, /Do not end after planning/i);
+	assert.match(reviewPrompt, /outputs\/\.plans\/<slug>-review-plan\.md/i);
+	assert.match(reviewPrompt, /outputs\/\.drafts\/<slug>-review-evidence\.md/i);
+	assert.match(reviewPrompt, /outputs\/<slug>-review\.md/i);
+	assert.match(reviewPrompt, /If PDF parsing fails/i);
+	assert.match(reviewPrompt, /Verification: BLOCKED/i);
+	assert.match(reviewPrompt, /verify on disk that `outputs\/<slug>-review\.md` exists/i);
+	assert.match(reviewPrompt, /Never end with planning-only chat/i);
+});
+
 test("workflow prompts except explicit gated workflows do not introduce implicit confirmation gates", () => {
 	const workflowPrompts = [
 		"audit.md",

@@ -35,7 +35,7 @@ Install on demand with `feynman packages install <preset>`. These extend Feynman
 
 | Package | Preset | Purpose |
 | --- | --- | --- |
-| `pi-generative-ui` | `generative-ui` | Interactive HTML-style widgets for rich output |
+| `pi-generative-ui` | `generative-ui` | Interactive HTML-style widgets for rich output on macOS. The upstream package currently declares macOS-only support |
 
 ## Installing and managing packages
 
@@ -50,6 +50,8 @@ Install a specific optional preset:
 ```bash
 feynman packages install generative-ui
 ```
+
+On Linux and Windows, `generative-ui` is hidden from `feynman packages list` and explicit installs print a platform message instead of attempting an npm install.
 
 ## Updating packages
 

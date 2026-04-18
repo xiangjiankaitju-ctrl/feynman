@@ -5,6 +5,7 @@ export const PI_SUBAGENTS_PATCH_TARGETS = [
 	"run-history.ts",
 	"skills.ts",
 	"chain-clarify.ts",
+	"pi-spawn.ts",
 	"subagent-executor.ts",
 	"schemas.ts",
 ];
@@ -195,6 +196,36 @@ export function patchPiSubagentsSource(relativePath, source) {
 				patched,
 				'const dir = path.join(os.homedir(), ".pi", "agent", "agents");',
 				'const dir = path.join(resolvePiAgentDir(), "agents");',
+			);
+			break;
+		case "pi-spawn.ts":
+			patched = replaceAll(
+				patched,
+				[
+					"\tconst argv1 = deps.argv1 ?? process.argv[1];",
+					"",
+					"\tif (argv1) {",
+					"\t\tconst argvPath = normalizePath(argv1);",
+					"\t\tif (isRunnableNodeScript(argvPath, existsSync)) {",
+					"\t\t\treturn argvPath;",
+					"\t\t}",
+					"\t}",
+				].join("\n"),
+				[
+					"\tconst argv1 = deps.argv1 ?? process.argv[1];",
+					"\tconst feynmanPiCliPath = process.env.FEYNMAN_PI_CLI_PATH;",
+					"\tif (feynmanPiCliPath) {",
+					"\t\tconst cliPath = normalizePath(feynmanPiCliPath);",
+					"\t\tif (isRunnableNodeScript(cliPath, existsSync)) return cliPath;",
+					"\t}",
+					"",
+					"\tif (argv1) {",
+					"\t\tconst argvPath = normalizePath(argv1);",
+					"\t\tif (path.basename(argvPath) !== \"pi-cli-wrapper.js\" && isRunnableNodeScript(argvPath, existsSync)) {",
+					"\t\t\treturn argvPath;",
+					"\t\t}",
+					"\t}",
+				].join("\n"),
 			);
 			break;
 		case "subagent-executor.ts":
